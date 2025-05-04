@@ -49,4 +49,6 @@ final allTagsProvider = Provider<List<String>>((ref) {
 
 // This provider holds the currently selected plant of the catalog
 // for viewing its details.
-final selectedPlantProvider = Provider<Plant?>((ref) => null);
+final selectedPlantProvider = Provider<Plant>((ref) { 
+  throw UnimplementedError("No plant selected yet.");
+});
