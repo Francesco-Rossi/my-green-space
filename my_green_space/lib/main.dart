@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:my_green_space/my_theme.dart';
+import 'package:my_green_space/utilities/my_theme.dart';
 import 'package:my_green_space/pages/homepage.dart';
 
 void main() {

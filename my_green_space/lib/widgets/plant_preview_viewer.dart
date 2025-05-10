@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:my_green_space/providers.dart';
+import 'package:my_green_space/utilities/providers.dart';
 
 // A card widget that displays a brief preview of a plant.
 // It  allows tapping for open a page with more details.
@@ -24,10 +24,9 @@ class PlantPreviewViewer extends ConsumerWidget {
             Expanded(
               flex: 1,
               child: SizedBox.expand(
-                child: Image.asset(
-                  plant.imageAsset ?? 'images/placeholder.jpg',
-                  fit: BoxFit.cover,
-                ),
+                child: plant.imageAsset != null && plant.imageAsset!.isNotEmpty
+                      ? Image.asset(plant.imageAsset!, fit: BoxFit.cover,)
+                      : const Icon(Icons.image_not_supported),
               ),
             ),
             // Contenuto a destra che occupa metà larghezza
