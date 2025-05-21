@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:my_green_space/pages/add_garden_plant_page.dart';
 import 'package:my_green_space/utilities/providers.dart';
 
 // This page displays the details of a specific plant selected from the catalog.
@@ -31,45 +32,80 @@ class SpecificPlantPage extends ConsumerWidget {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.only(bottom: 40, right: 40, top: 40),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Name
-                    Text(
-                      plant.name,
-                      style: const TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Name
+                          Text(
+                            plant.name,
+                            style: const TextStyle(
+                              fontSize: 30,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 15),
+                          // Description
+                          Text(
+                            plant.description ?? "No description available",
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                          const SizedBox(height: 20),
+                      
+                          // Info Sections
+                          _buildInfoSection("Plant exposure", plant.exposure, const Icon(Icons.wb_sunny, color: Colors.orange,)),
+                          _buildInfoSection("Optimal temperature range", plant.temperatureRange, const Icon(Icons.thermostat, color: Colors.redAccent,)),
+                          _buildInfoSection("Transplant period", plant.transplantPeriod, const Icon(Icons.calendar_today, color: Colors.blue,)),
+                          _buildInfoSection("Harvest period", plant.harvestPeriod, const Icon(Icons.local_florist, color: Colors.green,)),
+                          _buildInfoSection("Irrigation", plant.irrigation, const Icon(Icons.water_drop, color: Colors.blueAccent,)),
+                                                   
+                          // Tags
+                          if (plant.tags.isNotEmpty)
+                            Wrap(
+                              spacing: 8.0,
+                              runSpacing: 4.0,
+                              children:
+                                  plant.tags
+                                      .map((tag) => Chip(label: Text(tag)))
+                                      .toList(),
+                            ),                      
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 15),
-                    // Description
-                    Text(
-                      plant.description ?? "No description available",
-                      style: const TextStyle(fontSize: 16),
+                  ),
+                  const SizedBox(height: 20,),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ProviderScope(
+                            overrides: [
+                              selectedPlantProvider.overrideWithValue(plant),
+                            ],
+                            child: const AddGardenPlantPage()
+                          ),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.add, size: 20), 
+                    label: const Text(
+                      "Add to my garden",
+                      style: TextStyle(fontSize: 18),    
                     ),
-                    const SizedBox(height: 20),
-                
-                    // Info Sections
-                    _buildInfoSection("Plant exposure 🌞", plant.exposure),
-                    _buildInfoSection("Optimal temperature range 🌡️", plant.temperatureRange),
-                    _buildInfoSection("Transplant period 🌱", plant.transplantPeriod),
-                    _buildInfoSection("Harvest period 🌾", plant.harvestPeriod),
-                    _buildInfoSection("Irrigation 💧", plant.irrigation),
-                                             
-                    // Tags
-                    if (plant.tags.isNotEmpty)
-                      Wrap(
-                        spacing: 8.0,
-                        runSpacing: 4.0,
-                        children:
-                            plant.tags
-                                .map((tag) => Chip(label: Text(tag)))
-                                .toList(),
-                      ),                      
-                  ],
-                ),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14), 
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12), 
+                      ),
+                      elevation: 3,   
+                      backgroundColor: Colors.green[700], 
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -80,18 +116,23 @@ class SpecificPlantPage extends ConsumerWidget {
 } // end SpecificPlantPage.
 
 // Utility widget for section blocks.
-Widget _buildInfoSection(String title, dynamic content) {
+Widget _buildInfoSection(String title, dynamic content, Icon icon) {
   return Padding(
     padding: const EdgeInsets.only(bottom: 16.0),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title,
-            style: const TextStyle(
-              fontSize: 20, 
-              fontWeight: FontWeight.bold,
-              fontFamily: 'NotoEmoji',
-            )
+        Row(
+          children: [
+            Text(title,
+                style: const TextStyle(
+                  fontSize: 20, 
+                  fontWeight: FontWeight.bold,
+                )
+            ),
+            const SizedBox(width: 8),
+            icon,
+          ],
         ),
         const SizedBox(height: 5),
         Text(

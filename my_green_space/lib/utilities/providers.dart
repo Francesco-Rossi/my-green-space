@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:my_green_space/models/garden_plant.dart';
 import 'package:my_green_space/models/plant.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:my_green_space/utilities/garden_plants_notifier.dart';
 
 // Provides the full list of available plants in the catalog asynchronously.
 final plantCatalogProvider = FutureProvider<List<Plant>>(
@@ -67,5 +69,18 @@ final allTagsProvider = Provider<List<String>>(
 final selectedPlantProvider = Provider<Plant>(
   (ref) { 
     throw UnimplementedError("No plant selected yet.");
+  }
+);
+
+final gardenPlantsProvider = StateNotifierProvider<GardenPlantsNotifier, List<GardenPlant>>(
+  (ref) => GardenPlantsNotifier(),
+);
+
+final gardenPlantByIdProvider = Provider.family<GardenPlant, String>(
+  (ref, id) {
+    final allPlants = ref.watch(gardenPlantsProvider);
+    return allPlants.firstWhere(
+      (plant) => plant.id == id,
+    );
   }
 );

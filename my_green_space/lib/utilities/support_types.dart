@@ -47,3 +47,28 @@ class TemperatureRange {
     return '$min°C - $max°C';
   }
 } // end TemperatureRange class.
+
+// Represents a photo taken of a plant, including its file path, 
+// the date it was taken, and optional notes.
+class PlantPhoto {
+  final String imagePath; 
+  final DateTime dateTaken;
+  final String? notes;
+
+  PlantPhoto({
+    required this.imagePath,
+    required this.dateTaken,
+    this.notes,
+  });
+} // end PlantPhoto class.
+
+// This class represents a single watering event with date and amount of water used.
+class WateringRecord {
+  final DateTime date;
+  final double amount; 
+  
+  WateringRecord({
+    required this.date,
+    required this.amount,
+  });
+} // end WateringRecord class.
