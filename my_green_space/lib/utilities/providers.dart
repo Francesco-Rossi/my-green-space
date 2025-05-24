@@ -3,6 +3,7 @@ import 'package:my_green_space/models/garden_plant.dart';
 import 'package:my_green_space/models/plant.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_green_space/utilities/garden_plants_notifier.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 // Provides the full list of available plants in the catalog asynchronously.
 final plantCatalogProvider = FutureProvider<List<Plant>>(
@@ -72,6 +73,7 @@ final selectedPlantProvider = Provider<Plant>(
   }
 );
 
+/*
 final gardenPlantsProvider = StateNotifierProvider<GardenPlantsNotifier, List<GardenPlant>>(
   (ref) => GardenPlantsNotifier(),
 );
@@ -84,3 +86,26 @@ final gardenPlantByIdProvider = Provider.family<GardenPlant, String>(
     );
   }
 );
+*/
+
+final supabaseClientProvider = Provider<SupabaseClient>((ref) {
+  return Supabase.instance.client;
+});
+
+/*
+final gardenPlantsProvider = FutureProvider<List<GardenPlant>>((ref) async {
+  final supabase = ref.read(supabaseClientProvider);
+
+  final data = await supabase.from('garden_plants').select();
+
+  return (data as List<dynamic>)
+      .map((item) => GardenPlant.fromJson(item as Map<String, dynamic>))
+      .toList();
+});
+*/
+
+final gardenPlantsNotifierProvider =
+    StateNotifierProvider<GardenPlantsNotifier, List<GardenPlant>>((ref) {
+  final supabase = ref.read(supabaseClientProvider);
+  return GardenPlantsNotifier(supabase);
+});

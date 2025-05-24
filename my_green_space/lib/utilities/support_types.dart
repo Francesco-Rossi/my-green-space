@@ -51,12 +51,12 @@ class TemperatureRange {
 // Represents a photo taken of a plant, including its file path, 
 // the date it was taken, and optional notes.
 class PlantPhoto {
-  final String imagePath; 
+  final String imageUrl; 
   final DateTime dateTaken;
   final String? notes;
 
   PlantPhoto({
-    required this.imagePath,
+    required this.imageUrl,
     required this.dateTaken,
     this.notes,
   });

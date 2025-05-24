@@ -8,7 +8,7 @@ import 'package:my_green_space/widgets/plant_preview_viewer.dart';
 // This page displays the plant catalog available in the app as a grid. The user
 // can filter the plants by selecting a subset of the tags.
 // The selected tags are stored in a  provider and are used to filter the
-// plants displayed in the grid. The user can also tap on a plant to view its 
+// plants displayed in the grid. The user can also tap on a plant to view its
 // details in a new specific page.
 class PlantCatalogPage extends ConsumerWidget {
   const PlantCatalogPage({super.key});
@@ -26,7 +26,7 @@ class PlantCatalogPage extends ConsumerWidget {
           children: [
             SizedBox(height: 8),
             _MyTagFilterChips(),
-            SizedBox(height: 8),
+            SizedBox(height: 16),
             _VisiblePlantsCounter(),
             SizedBox(height: 8),
             Expanded(child: _PlantGridView()),
@@ -50,8 +50,8 @@ class _MyTagFilterChips extends ConsumerWidget {
     final selectedTags = ref.watch(selectedTagsProvider);
 
     return Wrap(
-      spacing: 8.0,
-      runSpacing: 4.0,
+      spacing: 10.0,
+      runSpacing: 6.0,
       // For each tag, we create a FilterChip widget.
       children:
           allTags.map((tag) {
@@ -87,25 +87,28 @@ class _VisiblePlantsCounter extends ConsumerWidget {
     debugPrint("Building _VisiblePlantsCounter…");
 
     // filteredPlants could be in different states: loading, error, or data.
-    final filteredPlants= ref.watch(filteredPlantsProvider);
+    final filteredPlants = ref.watch(filteredPlantsProvider);
 
     // We use the when() method to handle the different states of the provider.
     return filteredPlants.when(
       // Data uploaded successfully.
-      data: (plants) => Text(
-        "${plants.length} plants found",
-        style: const TextStyle(fontSize: 16),
-      ),
+      data:
+          (plants) => Text(
+            "${plants.length} plants found",
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
       // Loading: show a loading message.
-      loading: () => const Text(
-        "Loading…",
-        style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
-      ),
+      loading:
+          () => const Text(
+            "Loading…",
+            style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
+          ),
       // Error: show an error message.
-      error: (err, _) => const Text(
-        "Error: no plants found!",
-        style: TextStyle(fontSize: 16, color: Colors.red),
-      ),
+      error:
+          (err, _) => const Text(
+            "Error: no plants found!",
+            style: TextStyle(fontSize: 16, color: Colors.red),
+          ),
     );
   } // end build() method.
 } // end VisiblePlantsCounter.
@@ -124,59 +127,97 @@ class _PlantGridView extends ConsumerWidget {
     // Use the method when() to handle loading, error, and data states.
     return filteredPlants.when(
       // When data is available, display the grid.
-      data: (filteredPlants) => GridView.builder(
-        padding: const EdgeInsets.all(12.0),
-        itemCount: filteredPlants.length,
-        // We use the grid delegate to define the layout of the grid.
-        // In this case, we have three elements per row.
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          crossAxisSpacing: 15.0,
-          mainAxisSpacing: 5.0,
-          childAspectRatio: 0.9,
-        ),
-        // The itemBuilder function is called for each item in the grid.
-        // If an item is tapped, we navigate to the plant detail page using the
-        // stack method.
-        itemBuilder: (context, index) {
-          final plant = filteredPlants[index];
-
-          return ProviderScope(
-            overrides: [
-              // We override the selected plant provider with the current plant.
-              selectedPlantProvider.overrideWithValue(plant),
-            ],
-            child: GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ProviderScope(
-                      overrides: [
-                        selectedPlantProvider.overrideWithValue(plant),
-                      ],
-                      child: const SpecificPlantPage(),
-                    ),
-                  ),
-                );
-              },
-              child: const PlantPreviewViewer(),
+      data:
+          (filteredPlants) => GridView.builder(
+            padding: const EdgeInsets.all(12.0),
+            itemCount: filteredPlants.length,
+            // We use the grid delegate to define the layout of the grid.
+            // In this case, we have three elements per row.
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              crossAxisSpacing: 15.0,
+              mainAxisSpacing: 5.0,
+              childAspectRatio: 0.9,
             ),
-          );
-        }, // end itemBuilder.
-      ),
+            // The itemBuilder function is called for each item in the grid.
+            // If an item is tapped, we navigate to the plant detail page using the
+            // stack method.
+            itemBuilder: (context, index) {
+              final plant = filteredPlants[index];
+
+              return ProviderScope(
+                overrides: [
+                  // We override the selected plant provider with the current plant.
+                  selectedPlantProvider.overrideWithValue(plant),
+                ],
+                child: Builder(
+                  builder: (innerContext) {
+                    return GestureDetector(
+                    onTap: () async {
+                      final scaffoldMessenger = ScaffoldMessenger.of(innerContext);
+                      final result = await Navigator.push(
+                        innerContext,
+                        MaterialPageRoute(
+                          builder:
+                              (_) => ProviderScope(
+                                overrides: [
+                                  selectedPlantProvider.overrideWithValue(plant),
+                                ],
+                                child: const SpecificPlantPage(),
+                              ),
+                        ),
+                      );
+                      // If the user successfully adds the plant to its garden,
+                      // a feedback message is shown.
+                      if (result == true) {
+                        scaffoldMessenger.showSnackBar(
+                          SnackBar(
+                            content: const Row(
+                              children: [
+                                Icon(Icons.check_circle, color: Colors.white),
+                                SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    'Plant added successfully to your garden!',
+                                  ),
+                                ),
+                              ],
+                            ),
+                            duration: const Duration(seconds: 3),
+                            backgroundColor: Colors.green[700],
+                            behavior:
+                                SnackBarBehavior
+                                    .floating, // SnackBar flottante con ombra
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            margin: const EdgeInsets.all(
+                              16,
+                            ), // margine per staccarlo dai bordi
+                            elevation: 6, // un po' d'ombra in più
+                          ),
+                        );
+                      }
+                    },
+                    child: const PlantPreviewViewer(),
+                  );
+                  },
+                ),
+              );
+            }, // end itemBuilder.
+          ),
 
       // While the data is loading, show a loading spinner.
       loading: () => const Center(child: CircularProgressIndicator()),
 
       // If an error occurs, show a fallback error message.
-      error: (error, stackTrace) => const Center(
-        child: Text(
-          "Error loading plants",
-          style:  TextStyle(color: Colors.red),
-        ),
-      ),
+      error:
+          (error, stackTrace) => const Center(
+            child: Text(
+              "Error loading plants",
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
     );
   } // end build() method.
 } // end PlantGridView.
-
