@@ -38,6 +38,8 @@ dependencies:
   uuid: ^4.5.1
   supabase_flutter: ^2.9.0
   file_picker: ^10.1.9
+  intl: ^0.20.2
+  collection: ^1.19.1
 
 dev_dependencies:
   flutter_test:

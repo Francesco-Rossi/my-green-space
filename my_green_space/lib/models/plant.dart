@@ -3,6 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:my_green_space/utilities/support_types.dart';
 
 // This model represents a plant in the catalog of the application.
+// It includes various properties such as name, description, exposure, 
+// and a list of tags describing the plant.
+// Information of the plants are taken from 'https://www.ortomio.it/piante-da-orto'.
 class Plant {
   final String name;          
   final String? description;   
@@ -53,7 +56,6 @@ class Plant {
   // This static method loads the plant catalog from a local JSON file.
   // Parses each JSON object into a Plant instance using the 'fromJson' constructor.
   // Returns a Future that resolves to a list of Plant objects.
-  // Informations of the plants are taken from 'https://www.ortomio.it/piante-da-orto'.
   static Future<List<Plant>> getPlantsCatalog() async {
     final jsonString = await rootBundle.loadString('assets/plants.json');
     final List<dynamic> jsonList = json.decode(jsonString);

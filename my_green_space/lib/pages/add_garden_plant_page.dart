@@ -1,9 +1,11 @@
-import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_green_space/models/garden_plant.dart';
 import 'package:my_green_space/utilities/providers.dart';
+import 'package:my_green_space/utilities/support_types.dart';
+import 'package:uuid/uuid.dart';
 
 // This page allows the user to add a new plant to its garden,
 // by compiling a form with the plant's details.
@@ -12,7 +14,7 @@ import 'package:my_green_space/utilities/providers.dart';
 
 // A ConsumerStatefulWidget is used because we need both mutable
 // state (like form inputs and image selection) and access to
-// Riverpod providers..
+// Riverpod providers.
 class AddGardenPlantPage extends ConsumerStatefulWidget {
   const AddGardenPlantPage({super.key});
 
@@ -50,8 +52,8 @@ class _AddGardenPlantPageState extends ConsumerState<AddGardenPlantPage> {
 
   // Asynchronous method to pick an image from the file system.
   Future<void> pickImage() async {
-    // Use the file picker to select an image file.
-    // result contains the selected file's data.
+    // Use the file picker to select an image file. 
+    // The result contains the selected file's data.
     final result = await FilePicker.platform.pickFiles(type: FileType.image);
 
     // If the user selected a file and it has bytes, update the state.
@@ -77,6 +79,7 @@ class _AddGardenPlantPageState extends ConsumerState<AddGardenPlantPage> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint("Building AddGardenPlantPage...");
     final plantType = ref.watch(selectedPlantProvider);
 
     return Scaffold(
@@ -106,7 +109,8 @@ class _AddGardenPlantPageState extends ConsumerState<AddGardenPlantPage> {
                               )
                               : plantType.imageAsset != null &&
                                   plantType.imageAsset!.isNotEmpty
-                              ? Image.asset(
+                              ?  
+                                Image.asset(
                                 plantType.imageAsset!,
                                 fit: BoxFit.cover,
                               )
@@ -242,21 +246,47 @@ class _AddGardenPlantPageState extends ConsumerState<AddGardenPlantPage> {
                   Center(
                     child: ElevatedButton.icon(
                       // When the user clicks this button, a new GardenPlant
-                      // instance is created, and the provider is updated.
-                      onPressed: () {
-                        final newPlant = GardenPlant(
+                      // instance is created, and the respective provider is updated.
+                      onPressed: () async {
+                        final navigator = Navigator.of(context);
+                        final String? newUrl;
+                        Uint8List? imageToSave;
+                        String plantId = const Uuid().v4();
+
+                        // Setting the image to save.
+                        if (customImageBytes != null) {
+                          imageToSave = customImageBytes!;
+                        } else if (plantType.imageAsset != null && plantType.imageAsset!.isNotEmpty) {
+                          imageToSave = await loadImageBytesFromAsset(plantType.imageAsset!);
+                        } else {
+                          imageToSave = await loadImageBytesFromAsset("images/No_Image_Available.jpg");
+                        } 
+                        // Upload the image to the storage and get the URL.
+                        newUrl = await GardenPlant.uploadImage(
+                          imageBytes: imageToSave,
+                          imageType: 'profile',
+                          plantId: plantId,
+                          fileName: "${plantType.name}_$plantId",
+                        );
+                        // Create a new GardenPlant instance with the form data.
+                        final newGardenPlant = GardenPlant(
+                          id: plantId,
                           plantType: plantType.name,
                           plantingDate: plantingDate,
+                          mainPhotoUrl: newUrl ?? '',
                           notes: notesList,
                           position:
                               positionController.text.trim().isNotEmpty
                                   ? positionController.text.trim()
                                   : null,
                         );
+                        // Updating the gardenPlantsProvider.
                         ref
-                            .read(gardenPlantsNotifierProvider.notifier)
-                            .addPlant(newPlant);
-                        Navigator.pop(context, true);
+                            .read(gardenPlantsProvider.notifier)
+                            .addPlant(newGardenPlant);
+                        if (!mounted) return;
+                        navigator.pop(true);
+                        //Navigator.pop(context, true);
                       },
                       icon: const Icon(Icons.check),
                       label: const Text("Add to Garden"),

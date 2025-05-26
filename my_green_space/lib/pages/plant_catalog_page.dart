@@ -150,58 +150,22 @@ class _PlantGridView extends ConsumerWidget {
                   // We override the selected plant provider with the current plant.
                   selectedPlantProvider.overrideWithValue(plant),
                 ],
-                child: Builder(
-                  builder: (innerContext) {
-                    return GestureDetector(
-                    onTap: () async {
-                      final scaffoldMessenger = ScaffoldMessenger.of(innerContext);
-                      final result = await Navigator.push(
-                        innerContext,
-                        MaterialPageRoute(
-                          builder:
-                              (_) => ProviderScope(
-                                overrides: [
-                                  selectedPlantProvider.overrideWithValue(plant),
-                                ],
-                                child: const SpecificPlantPage(),
-                              ),
-                        ),
-                      );
-                      // If the user successfully adds the plant to its garden,
-                      // a feedback message is shown.
-                      if (result == true) {
-                        scaffoldMessenger.showSnackBar(
-                          SnackBar(
-                            content: const Row(
-                              children: [
-                                Icon(Icons.check_circle, color: Colors.white),
-                                SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    'Plant added successfully to your garden!',
-                                  ),
-                                ),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (context) => ProviderScope(
+                              overrides: [
+                                selectedPlantProvider.overrideWithValue(plant),
                               ],
+                              child: const SpecificPlantPage(),
                             ),
-                            duration: const Duration(seconds: 3),
-                            backgroundColor: Colors.green[700],
-                            behavior:
-                                SnackBarBehavior
-                                    .floating, // SnackBar flottante con ombra
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            margin: const EdgeInsets.all(
-                              16,
-                            ), // margine per staccarlo dai bordi
-                            elevation: 6, // un po' d'ombra in più
-                          ),
-                        );
-                      }
-                    },
-                    child: const PlantPreviewViewer(),
-                  );
+                      ),
+                    );
                   },
+                  child: const PlantPreviewViewer(),
                 ),
               );
             }, // end itemBuilder.

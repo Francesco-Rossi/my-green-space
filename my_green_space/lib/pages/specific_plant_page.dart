@@ -140,7 +140,9 @@ class SpecificPlantPage extends ConsumerWidget {
                                 Icon(Icons.check_circle, color: Colors.white),
                                 SizedBox(width: 12),
                                 Expanded(
-                                  child: Text('Plant added successfully to your garden!'),
+                                  child: Text(
+                                    'Plant added successfully to your garden!',
+                                  ),
                                 ),
                               ],
                             ),

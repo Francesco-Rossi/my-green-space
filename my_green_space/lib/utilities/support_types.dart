@@ -1,6 +1,9 @@
 // This file defines support types used throughout the app.
 
 // Enumeration of months.
+
+import 'package:flutter/services.dart';
+
 enum Month {
   january, february, march, april, may, june,
   july, august, september, october, november, december
@@ -69,6 +72,12 @@ class WateringRecord {
   
   WateringRecord({
     required this.date,
-    required this.amount,
+    this.amount = 0.0,
   });
 } // end WateringRecord class.
+
+// Utility function to load image bytes from an asset file.
+Future<Uint8List> loadImageBytesFromAsset(String assetPath) async {
+  final byteData = await rootBundle.load(assetPath);
+  return byteData.buffer.asUint8List();
+}
