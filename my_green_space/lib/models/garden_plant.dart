@@ -72,7 +72,7 @@ class GardenPlant {
           ?.map((e) => PlantPhoto(
                 imageUrl: e['imagePath'],
                 dateTaken: DateTime.parse(e['dateTaken']),
-                notes: e['notes'],
+                note: e['notes'],
               ))
           .toList(),
       wateringRecords: (jsonItem['wateringRecords'] as List<dynamic>?)
@@ -96,7 +96,7 @@ class GardenPlant {
       'photos': photos?.map((photo) => {
             'imageUrl': photo.imageUrl,
             'dateTaken': photo.dateTaken.toIso8601String(),
-            'notes': photo.notes,
+            'notes': photo.note,
           }).toList(),
       'wateringRecords': wateringRecords?.map((record) => {
             'date': record.date.toIso8601String(),
@@ -120,7 +120,15 @@ class GardenPlant {
       late final String path;
       // Determine the path based on the image type.
       if (imageType == 'profile') {
-        path = 'plants/plant_$plantId/$fileName.jpg';
+        path = 'plants/plant_$plantId/profile/$fileName.jpg';
+        // If the image type is 'profile', we first delete any existing profile images.  
+        final fileList = await storage.from(bucketId).list(path: 'plants/plant_$plantId/profile');
+        final pathsToDelete = fileList.map((f) => 'plants/plant_$plantId/${f.name}').toList();
+
+        if (pathsToDelete.isNotEmpty) {
+          debugPrint("Deleting old profile files: $pathsToDelete");
+          await storage.from(bucketId).remove(pathsToDelete);
+      }
       } else if (imageType == 'evolution') {
         path = 'plants/$plantId/evolution/$fileName.jpg';
       } else {

@@ -56,12 +56,12 @@ class TemperatureRange {
 class PlantPhoto {
   final String imageUrl; 
   final DateTime dateTaken;
-  final String? notes;
+  final String? note;
 
   PlantPhoto({
     required this.imageUrl,
     required this.dateTaken,
-    this.notes,
+    this.note,
   });
 } // end PlantPhoto class.
 

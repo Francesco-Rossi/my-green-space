@@ -38,8 +38,23 @@ class GardenPlantsNotifier extends StateNotifier<List<GardenPlant>> {
   // Method to remove a plant from the database and update the state accordingly.
   Future<void> removePlant(GardenPlant plantToRemove) async {
     await supabase.from('garden_plants').delete().eq('id', plantToRemove.id);
+
+    // The following code deletes all images associated with the plant 
+    // from the Supabase storage.
+    final storage = supabase.storage;
+    const bucketId = 'user-plants-images';
+    final folderPath = 'plants/plant_${plantToRemove.id}';
+
+    final fileList = await storage.from(bucketId).list(path: folderPath);
+    final pathsToDelete = fileList.map((f) => '$folderPath/${f.name}').toList();
+
+    if (pathsToDelete.isNotEmpty) {
+      await storage.from(bucketId).remove(pathsToDelete);
+    }
+
     state = state.where((plant) => plant.id != plantToRemove.id).toList();
   } // end removePlant method.
+
 
   // Method to update an existing plant in the database and update the state accordingly.
   Future<void> updatePlant(GardenPlant updatedPlant) async {
@@ -61,6 +76,22 @@ class GardenPlantsNotifier extends StateNotifier<List<GardenPlant>> {
   // Method to clear all plants from both the local state and the Supabase database.
   Future<void> clearAll() async {
     await supabase.from('garden_plants').delete();
+
+    // All the images associated with the plants will also be deleted from
+    // the Supabase storage.
+    final storage = supabase.storage;
+    const bucketId = 'user-plants-images';
+
+    for (final plant in state) {
+      final folderPath = 'plants/plant_${plant.id}';
+      final fileList = await storage.from(bucketId).list(path: folderPath);
+      final pathsToDelete = fileList.map((f) => '$folderPath/${f.name}').toList();
+
+      if (pathsToDelete.isNotEmpty) {
+        await storage.from(bucketId).remove(pathsToDelete);
+      }
+    }
+
     state = [];
   } // end clearAll method.
 } // end GardenPlantsNotifier class.
