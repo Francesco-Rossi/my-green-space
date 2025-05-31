@@ -57,11 +57,13 @@ class PlantPhoto {
   final String imageUrl; 
   final DateTime dateTaken;
   final String? note;
+  final String? storagePath;
 
   PlantPhoto({
     required this.imageUrl,
     required this.dateTaken,
     this.note,
+    this.storagePath,
   });
 } // end PlantPhoto class.
 

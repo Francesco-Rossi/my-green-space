@@ -29,6 +29,8 @@ class _AddGardenPlantPageState extends ConsumerState<AddGardenPlantPage> {
   late TextEditingController positionController;
   // List to hold notes added by the user.
   final List<String> notesList = [];
+  // Extension for the image file, used when uploading the image.
+  late String imageExt; 
   // Variable to hold the custom image (that is a list of bytes)
   // if the user selects an image.
   Uint8List? customImageBytes;
@@ -40,6 +42,7 @@ class _AddGardenPlantPageState extends ConsumerState<AddGardenPlantPage> {
     plantingDate = DateTime.now();
     notesController = TextEditingController();
     positionController = TextEditingController();
+    imageExt = 'jpg';
   }
 
   // Dispose of the controllers when the page is disposed to free up resources.
@@ -55,6 +58,7 @@ class _AddGardenPlantPageState extends ConsumerState<AddGardenPlantPage> {
     // Use the file picker to select an image file. 
     // The result contains the selected file's data.
     final result = await FilePicker.platform.pickFiles(type: FileType.image);
+    imageExt = result?.files.single.extension ?? ''; 
 
     // If the user selected a file and it has bytes, update the state.
     // The method setState triggers the rebuild of the widget.
@@ -252,6 +256,7 @@ class _AddGardenPlantPageState extends ConsumerState<AddGardenPlantPage> {
                         final String? newUrl;
                         Uint8List? imageToSave;
                         String plantId = const Uuid().v4();
+                
 
                         // Setting the image to save.
                         if (customImageBytes != null) {
@@ -261,12 +266,15 @@ class _AddGardenPlantPageState extends ConsumerState<AddGardenPlantPage> {
                         } else {
                           imageToSave = await loadImageBytesFromAsset("images/No_Image_Available.jpg");
                         } 
+                        if (imageExt == '') {
+                          imageExt = 'jpg'; // Default to jpg if no extension is provided.
+                        }
                         // Upload the image to the storage and get the URL.
                         newUrl = await GardenPlant.uploadImage(
                           imageBytes: imageToSave,
                           imageType: 'profile',
                           plantId: plantId,
-                          fileName: "${plantType.name}_$plantId",
+                          fileNameWithExt: "${plantType.name}_$plantId.$imageExt",
                         );
                         // Create a new GardenPlant instance with the form data.
                         final newGardenPlant = GardenPlant(

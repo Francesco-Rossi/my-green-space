@@ -17,7 +17,7 @@ class PlantPreviewViewer extends ConsumerWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       clipBehavior: Clip.antiAlias,
       child: SizedBox(
-        height: 120,
+        // height: 120,
         child: Row(
           children: [
             // Image on the left.

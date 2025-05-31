@@ -8,6 +8,52 @@ import 'package:my_green_space/widgets/my_drawer.dart';
 class HomeGardenPage extends ConsumerWidget {
   const HomeGardenPage({super.key});
 
+  // This method is called when the user taps the botton to delete all plants.
+  Future<void> _confirmAndDeleteAllPlants(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text(
+              'Delete all plants',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            content: const Text(
+              'Are you sure you want to delete all plants from your garden? ',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(false),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(ctx).pop(true),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                child: const Text(
+                  'Delete All',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+    );
+
+    if (confirm == true) {
+      // Call the notifier to clear all plants from the garden.
+      await ref.read(gardenPlantsProvider.notifier).clearAll();
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('All the plants have been deleted from your garden.'),
+          ),
+        );
+      }
+    }
+  } // end _confirmAndDeleteAllPlants method.
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     debugPrint("Building HomeGardenPage...");
@@ -28,9 +74,16 @@ class HomeGardenPage extends ConsumerWidget {
           ],
         ),
       ),
+      // FloatingActionButton for deleting all plants.
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _confirmAndDeleteAllPlants(context, ref),
+        backgroundColor: Colors.red[400],
+        tooltip: 'Delete all plants',
+        child: const Icon(Icons.delete_forever, color: Colors.white),
+      ),
     );
   }
-}
+} // end HomeGardenPage.
 
 // A widget that displays a list of filter chips for all available plants in
 // the catalog.
@@ -105,18 +158,79 @@ class _GardenPlantGridView extends ConsumerWidget {
       ),
       itemCount: filteredGardenPlants.length,
       itemBuilder: (context, index) {
+        debugPrint("Building grid item at index: $index");
         final gardenPlant = filteredGardenPlants[index];
         return GestureDetector(
-          onTap: () {
-            Navigator.push(
+          onTap: () async {
+            final deleted = await Navigator.push<bool>(
               context,
               MaterialPageRoute(
                 builder:
                     (_) => SpecificGardenPlantPage(plantId: gardenPlant.id),
               ),
             );
+            if (deleted == true && context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Plant deleted successfully')),
+              );
+            }
           },
-          child: GardenPlantPreviewViewer(plantId: gardenPlant.id),
+          child: Stack(
+            children: [
+              GardenPlantPreviewViewer(plantId: gardenPlant.id),
+              Positioned(
+                bottom: 8,
+                right: 8,
+                child: TextButton.icon(
+                  onPressed: () async {
+                    final bool? confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text(
+                          'Delete Plant',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        content: const Text(
+                          'Are you sure you want to delete this plant?',
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(ctx).pop(false),
+                            child: const Text('Cancel'),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(ctx).pop(true);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                            ),
+                            child: const Text(
+                              'Delete',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+
+                    if (confirm == true) {
+                      await ref.read(gardenPlantsProvider.notifier)
+                          .removePlant(gardenPlant);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Plant deleted successfully'),
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  label: const Icon(Icons.delete,),
+                ),
+              ),
+            ],
+          ),
         );
       },
     );

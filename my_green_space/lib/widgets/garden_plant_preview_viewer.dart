@@ -14,9 +14,10 @@ class GardenPlantPreviewViewer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    debugPrint("Building GardenPlantPreviewViewer for plant ID: $plantId");
     final gardenPlant = ref.watch(selectedGardenPlantProvider(plantId));
     // Format the planting date to a readable format (String).
-    final dateFormatted = DateFormat.yMMMd().format(gardenPlant.plantingDate);
+    final dateFormatted = DateFormat.yMMMd().format(gardenPlant!.plantingDate);
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),

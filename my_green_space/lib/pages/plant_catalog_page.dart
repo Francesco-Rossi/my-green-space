@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:my_green_space/pages/add_garden_plant_page.dart';
 import 'package:my_green_space/pages/specific_plant_page.dart';
 import 'package:my_green_space/utilities/providers.dart';
 import 'package:my_green_space/widgets/my_drawer.dart';
@@ -165,7 +166,41 @@ class _PlantGridView extends ConsumerWidget {
                       ),
                     );
                   },
-                  child: const PlantPreviewViewer(),
+                  child: Stack(
+                    children: [
+                      const PlantPreviewViewer(),
+                      Positioned(
+                        bottom: 8.0,
+                        right: 8.0,
+                        child: TextButton.icon(
+                          onPressed: () async {
+                            final result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (context) => ProviderScope(
+                                      overrides: [
+                                        selectedPlantProvider.overrideWithValue(
+                                          plant,
+                                        ),
+                                      ],
+                                      child: const AddGardenPlantPage(),
+                                    ),
+                              ),
+                            );
+                            if (result && context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Plant added successfully'),
+                                ),
+                              );
+                            }
+                          },
+                          label: const Icon(Icons.add),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               );
             }, // end itemBuilder.

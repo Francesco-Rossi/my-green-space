@@ -54,110 +54,91 @@ class _SpecificGardenPlantPageState
     );
 
     return Scaffold(
-      appBar: AppBar(title: Text('My ${myGardenPlant.plantType}')),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Row(
-          children: [
-            // Left side: Plant image and change image button.
-            // The image is fetched from Supabase storage.
-            Expanded(
-              flex: 4,
-              child: Column(
+      appBar: AppBar(title: Text('My ${myGardenPlant?.plantType ?? 'No plant found'}')),
+      body: myGardenPlant == null
+          ? const Center(
+              child: Text(
+                'No plant found with the provided ID.',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+            )
+          : Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Row(
                 children: [
+                  // Left side: Plant image and change image button.
+                  // The image is fetched from Supabase storage.
                   Expanded(
-                    child:
-                        myGardenPlant.mainPhotoUrl != null &&
-                                myGardenPlant.mainPhotoUrl!.isNotEmpty
-                            ? ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: Image.network(
-                                myGardenPlant.mainPhotoUrl!,
-                                fit: BoxFit.cover,
-                                width: double.infinity,
-                                height: double.infinity,
-                                errorBuilder:
-                                    (_, __, ___) => Image.asset(
+                    flex: 4,
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: myGardenPlant.mainPhotoUrl != null &&
+                                  myGardenPlant.mainPhotoUrl!.isNotEmpty
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.network(
+                                    myGardenPlant.mainPhotoUrl!,
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                    errorBuilder: (_, __, ___) => Image.asset(
                                       'images/No_Image_Available.jpg',
                                       fit: BoxFit.cover,
                                       width: double.infinity,
                                       height: double.infinity,
                                     ),
-                              ),
-                            )
-                            : Center(
-                              child: Image.asset(
-                                'images/No_Image_Available.jpg',
-                                fit: BoxFit.cover,
-                                width: double.infinity,
-                                height: double.infinity,
-                              ),
-                            ),
-                  ),
-                  const SizedBox(height: 12),
-                  // Button to change the main image of the plant.
-                  ElevatedButton.icon(
-                    onPressed: _pickAndUploadMainImage,
-                    icon: const Icon(Icons.upload),
-                    label: const Text("Change Image"),
-                  ),
-                ],
-              ),
-            ),
-            // Right side: Plant details, notes, watering records, and photos.
-            Expanded(
-              flex: 6,
-              child: Column(
-                children: [
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.only(left: 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            myGardenPlant.plantType,
-                            style: const TextStyle(
-                              fontSize: 30,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'ID: ${myGardenPlant.id}',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                          const SizedBox(height: 25),
-                          RichText(
-                            // Planting Date
-                            text: TextSpan(
-                              style: const TextStyle(
-                                fontSize: 16,
-                                color: Colors.black,
-                              ),
-                              children: [
-                                const TextSpan(
-                                  text: 'Planted on: ',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                TextSpan(
-                                  text: DateFormat.yMMMd().format(
-                                    myGardenPlant.plantingDate,
+                                  ),
+                                )
+                              : Center(
+                                  child: Image.asset(
+                                    'images/No_Image_Available.jpg',
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    height: double.infinity,
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            // Position
-                            children: [
-                              Expanded(
-                                child: RichText(
+                        ),
+                        const SizedBox(height: 12),
+                        // Button to change the main image of the plant.
+                        ElevatedButton.icon(
+                          onPressed: _pickAndUploadMainImage,
+                          icon: const Icon(Icons.upload),
+                          label: const Text("Change Image"),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Right side: Plant details, notes, watering records, and photos.
+                  Expanded(
+                    flex: 6,
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: SingleChildScrollView(
+                            padding: const EdgeInsets.only(left: 20),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  myGardenPlant.plantType,
+                                  style: const TextStyle(
+                                    fontSize: 30,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'ID: ${myGardenPlant.id}',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[600],
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                ),
+                                const SizedBox(height: 25),
+                                RichText(
+                                  // Planting Date
                                   text: TextSpan(
                                     style: const TextStyle(
                                       fontSize: 16,
@@ -165,318 +146,294 @@ class _SpecificGardenPlantPageState
                                     ),
                                     children: [
                                       const TextSpan(
-                                        text: 'Position: ',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                        text: 'Planted on: ',
+                                        style: TextStyle(fontWeight: FontWeight.bold),
                                       ),
                                       TextSpan(
-                                        text:
-                                            myGardenPlant.position ??
-                                            'Not specified',
+                                        text: DateFormat.yMMMd().format(
+                                                myGardenPlant.plantingDate,
+                                              ),
                                       ),
                                     ],
                                   ),
                                 ),
-                              ),
-                              // IconButton to change the position.
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.edit_location_alt,
-                                  color: Colors.teal,
-                                ),
-                                tooltip: 'Edit Position',
-                                onPressed: () => _editPositionDialog(),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 30),
-                          // Notes
-                          _buildSection(
-                            title: 'Notes',
-                            count: myGardenPlant.notes?.length ?? 0,
-                            icon: Icons.note,
-                            child: SizedBox(
-                              height: 180,
-                              child:
-                                  (myGardenPlant.notes == null ||
-                                          myGardenPlant.notes!.isEmpty)
-                                      ? const Center(
-                                        child: Text(
-                                          "No notes yet.",
-                                          style: TextStyle(
-                                            fontStyle: FontStyle.italic,
+                                const SizedBox(height: 8),
+                                Row(
+                                  // Position
+                                  children: [
+                                    Expanded(
+                                      child: RichText(
+                                        text: TextSpan(
+                                          style: const TextStyle(
                                             fontSize: 16,
+                                            color: Colors.black,
                                           ),
+                                          children: [
+                                            const TextSpan(
+                                              text: 'Position: ',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            TextSpan(
+                                              text: myGardenPlant.position ?? 'Not specified',
+                                            ),
+                                          ],
                                         ),
-                                      )
-                                      : Scrollbar(
-                                        controller: _notesScrollController,
-                                        child: ListView.builder(
-                                          controller: _notesScrollController,
-                                          itemCount:
-                                              myGardenPlant.notes?.length ?? 0,
-                                          itemBuilder: (ctx, index) {
-                                            final note =
-                                                myGardenPlant.notes![index];
-                                            return Card(
-                                              margin:
-                                                  const EdgeInsets.symmetric(
+                                      ),
+                                    ),
+                                    // IconButton to change the position.
+                                    IconButton(
+                                      icon: const Icon(
+                                        Icons.edit_location_alt,
+                                        color: Colors.teal,
+                                      ),
+                                      tooltip: 'Edit Position',
+                                      onPressed: () => _editPositionDialog(),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 30),
+                                // Notes
+                                _buildSection(
+                                  title: 'Notes',
+                                  count: myGardenPlant.notes?.length ?? 0,
+                                  icon: Icons.note,
+                                  child: SizedBox(
+                                    height: 180,
+                                    child: (myGardenPlant.notes == null ||
+                                            myGardenPlant.notes!.isEmpty)
+                                        ? const Center(
+                                            child: Text(
+                                              "No notes yet.",
+                                              style: TextStyle(
+                                                fontStyle: FontStyle.italic,
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                          )
+                                        : Scrollbar(
+                                            controller: _notesScrollController,
+                                            child: ListView.builder(
+                                              controller: _notesScrollController,
+                                              itemCount: myGardenPlant.notes?.length ?? 0,
+                                              itemBuilder: (ctx, index) {
+                                                final note = myGardenPlant.notes![index];
+                                                return Card(
+                                                  margin: const EdgeInsets.symmetric(
                                                     vertical: 4,
                                                   ),
-                                              child: ListTile(
-                                                title: Text(note),
-                                                // Bottons to edit or delete the note.
-                                                trailing: Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [
-                                                    IconButton(
-                                                      icon: const Icon(
-                                                        Icons.edit,
-                                                      ),
-                                                      onPressed:
-                                                          () => _editNoteDialog(
-                                                            index,
+                                                  child: ListTile(
+                                                    title: Text(note),
+                                                    // Bottons to edit or delete the note.
+                                                    trailing: Row(
+                                                      mainAxisSize: MainAxisSize.min,
+                                                      children: [
+                                                        IconButton(
+                                                          icon: const Icon(
+                                                            Icons.edit,
                                                           ),
+                                                          onPressed: () => _editNoteDialog(index),
+                                                        ),
+                                                        IconButton(
+                                                          icon: const Icon(
+                                                            Icons.delete,
+                                                          ),
+                                                          onPressed: () => _confirmDeleteNote(index),
+                                                        ),
+                                                      ],
                                                     ),
-                                                    IconButton(
-                                                      icon: const Icon(
-                                                        Icons.delete,
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                  ),
+                                  action: TextButton.icon(
+                                    onPressed: () => _addNoteDialog(),
+                                    icon: const Icon(Icons.add),
+                                    label: const Text("Add Note"),
+                                  ),
+                                ),
+                                // Watering Records.
+                                _buildSection(
+                                  title: 'Watering Records',
+                                  count: myGardenPlant.wateringRecords?.length ?? 0,
+                                  icon: Icons.water_drop,
+                                  child: SizedBox(
+                                    height: 180,
+                                    child: (myGardenPlant.wateringRecords == null ||
+                                            myGardenPlant.wateringRecords!.isEmpty)
+                                        ? const Center(
+                                            child: Text(
+                                              "No watering records yet.",
+                                              style: TextStyle(
+                                                fontStyle: FontStyle.italic,
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                          )
+                                        : Scrollbar(
+                                            controller: _wateringScrollController,
+                                            child: ListView.builder(
+                                              controller: _wateringScrollController,
+                                              itemCount: myGardenPlant.wateringRecords?.length ?? 0,
+                                              itemBuilder: (ctx, index) {
+                                                final record = myGardenPlant.wateringRecords![index];
+                                                return Card(
+                                                  margin: const EdgeInsets.symmetric(
+                                                    vertical: 4,
+                                                  ),
+                                                  child: ListTile(
+                                                    leading: const Icon(
+                                                      Icons.water_drop,
+                                                      color: Colors.blue,
+                                                    ),
+                                                    title: Text(
+                                                      DateFormat.yMMMd().format(
+                                                        record.date,
                                                       ),
-                                                      onPressed:
-                                                          () =>
-                                                              _confirmDeleteNote(
-                                                                index,
+                                                    ),
+                                                    subtitle: record.amount != 0
+                                                        ? Text(
+                                                            'Water: ${record.amount} ml',
+                                                          )
+                                                        : const Text(
+                                                            'Watered (amount not specified)',
+                                                          ),
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                  ),
+                                  action: TextButton.icon(
+                                    onPressed: () => _addWateringRecordDialog(),
+                                    icon: const Icon(Icons.add),
+                                    label: const Text("Add Watering"),
+                                  ),
+                                ),
+                                // Evolution Photos.
+                                _buildSection(
+                                  title: 'Evolution Photos',
+                                  count: myGardenPlant.photos?.length ?? 0,
+                                  icon: Icons.photo,
+                                  child: SizedBox(
+                                    height: 180,
+                                    child: (myGardenPlant.photos == null ||
+                                            myGardenPlant.photos!.isEmpty)
+                                        ? const Center(
+                                            child: Text(
+                                              'No evolution photos yet.',
+                                              style: TextStyle(
+                                                fontStyle: FontStyle.italic,
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                          )
+                                        : ListView.builder(
+                                            scrollDirection: Axis.horizontal,
+                                            itemCount: myGardenPlant.photos?.length ?? 0,
+                                            itemBuilder: (ctx, index) {
+                                              final evolutionPhoto = myGardenPlant.photos![index];
+                                              return Padding(
+                                                padding: const EdgeInsets.symmetric(
+                                                  horizontal: 6.0,
+                                                ),
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                                  children: [
+                                                    Expanded(
+                                                      child: InkWell(
+                                                        onTap: () {
+                                                          _showEvolutionPhotoDialog(index);
+                                                        },
+                                                        child: Hero(
+                                                          tag: evolutionPhoto.imageUrl,
+                                                          child: Container(
+                                                            decoration: BoxDecoration(
+                                                              border: Border.all(
+                                                                color: Colors.black,
+                                                                width: 2.5,
                                                               ),
+                                                              borderRadius: BorderRadius.circular(12),
+                                                            ),
+                                                            child: ClipRRect(
+                                                              borderRadius: BorderRadius.circular(12),
+                                                              child: Image.network(
+                                                                evolutionPhoto.imageUrl,
+                                                                width: 200,
+                                                                height: double.infinity,
+                                                                fit: BoxFit.cover,
+                                                                errorBuilder: (
+                                                                  imgCtx,
+                                                                  error,
+                                                                  stackTrace,
+                                                                ) {
+                                                                  return Container(
+                                                                    width: 200,
+                                                                    height: double.infinity,
+                                                                    color: Colors.grey[300],
+                                                                    child: const Icon(
+                                                                      Icons.broken_image,
+                                                                      size: 40,
+                                                                      color: Colors.grey,
+                                                                    ),
+                                                                  );
+                                                                },
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    const SizedBox(height: 4),
+                                                    Text(
+                                                      DateFormat.yMMMd().format(
+                                                        evolutionPhoto.dateTaken,
+                                                      ),
+                                                      style: TextStyle(
+                                                        fontSize: 12,
+                                                        color: Colors.grey[700],
+                                                        fontStyle: FontStyle.italic,
+                                                      ),
                                                     ),
                                                   ],
                                                 ),
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      ),
-                            ),
-                            action: TextButton.icon(
-                              onPressed: () => _addNoteDialog(),
-                              icon: const Icon(Icons.add),
-                              label: const Text("Add Note"),
-                            ),
-                          ),
-                          // Watering Records.
-                          _buildSection(
-                            title: 'Watering Records',
-                            count: myGardenPlant.wateringRecords?.length ?? 0,
-                            icon: Icons.water_drop,
-                            child: SizedBox(
-                              height: 180,
-                              child:
-                                  (myGardenPlant.wateringRecords == null ||
-                                          myGardenPlant
-                                              .wateringRecords!
-                                              .isEmpty)
-                                      ? const Center(
-                                        child: Text(
-                                          "No watering records yet.",
-                                          style: TextStyle(
-                                            fontStyle: FontStyle.italic,
-                                            fontSize: 16,
+                                              );
+                                            },
                                           ),
-                                        ),
-                                      )
-                                      : Scrollbar(
-                                        controller: _wateringScrollController,
-                                        child: ListView.builder(
-                                          controller: _wateringScrollController,
-                                          itemCount:
-                                              myGardenPlant
-                                                  .wateringRecords
-                                                  ?.length ??
-                                              0,
-                                          itemBuilder: (ctx, index) {
-                                            final record =
-                                                myGardenPlant
-                                                    .wateringRecords![index];
-                                            return Card(
-                                              margin:
-                                                  const EdgeInsets.symmetric(
-                                                    vertical: 4,
-                                                  ),
-                                              child: ListTile(
-                                                leading: const Icon(
-                                                  Icons.water_drop,
-                                                  color: Colors.blue,
-                                                ),
-                                                title: Text(
-                                                  DateFormat.yMMMd().format(
-                                                    record.date,
-                                                  ),
-                                                ),
-                                                subtitle:
-                                                    record.amount != 0
-                                                        ? Text(
-                                                          'Water: ${record.amount} ml',
-                                                        )
-                                                        : const Text(
-                                                          'Watered (amount not specified)',
-                                                        ),
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      ),
-                            ),
-                            action: TextButton.icon(
-                              onPressed: () => _addWateringRecordDialog(),
-                              icon: const Icon(Icons.add),
-                              label: const Text("Add Watering"),
+                                  ),
+                                  // Button to add a new evolution photo.
+                                  action: TextButton.icon(
+                                    onPressed: _addEvolutionPhoto,
+                                    icon: const Icon(Icons.add_a_photo),
+                                    label: const Text("Add Photo"),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          // Evolution Photos.
-                          _buildSection(
-                            title: 'Evolution Photos',
-                            count: myGardenPlant.photos?.length ?? 0,
-                            icon: Icons.photo,
-                            child: SizedBox(
-                              height: 180,
-                              child:
-                                  (myGardenPlant.photos == null ||
-                                          myGardenPlant.photos!.isEmpty)
-                                      ? const Center(
-                                        child: Text(
-                                          'No evolution photos yet.',
-                                          style: TextStyle(
-                                            fontStyle: FontStyle.italic,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                      )
-                                      : ListView.builder(
-                                        scrollDirection: Axis.horizontal,
-                                        itemCount:
-                                            myGardenPlant.photos?.length ?? 0,
-                                        itemBuilder: (ctx, index) {
-                                          final evolutionPhoto =
-                                              myGardenPlant.photos![index];
-                                          return Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 6.0,
-                                            ),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              children: [
-                                                Expanded(
-                                                  child: InkWell(
-                                                    onTap: () {
-                                                      _showEvolutionPhotoDialog(
-                                                        index,
-                                                      );
-                                                    },
-                                                    child: Hero(
-                                                      tag:
-                                                          evolutionPhoto
-                                                              .imageUrl,
-                                                      child: Container(
-                                                        decoration: BoxDecoration(
-                                                          border: Border.all(
-                                                            color: Colors.black,
-                                                            width: 2.5,
-                                                          ),
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                12,
-                                                              ),
-                                                        ),
-                                                        child: ClipRRect(
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                12,
-                                                              ),
-                                                          child: Image.network(
-                                                            evolutionPhoto
-                                                                .imageUrl,
-                                                            width: 200,
-                                                            height:
-                                                                double.infinity,
-                                                            fit: BoxFit.cover,
-                                                            errorBuilder: (
-                                                              imgCtx,
-                                                              error,
-                                                              stackTrace,
-                                                            ) {
-                                                              return Container(
-                                                                width: 200,
-                                                                height:
-                                                                    double
-                                                                        .infinity,
-                                                                color:
-                                                                    Colors
-                                                                        .grey[300],
-                                                                child: const Icon(
-                                                                  Icons
-                                                                      .broken_image,
-                                                                  size: 40,
-                                                                  color:
-                                                                      Colors
-                                                                          .grey,
-                                                                ),
-                                                              );
-                                                            },
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 4),
-                                                Text(
-                                                  DateFormat.yMMMd().format(
-                                                    evolutionPhoto.dateTaken,
-                                                  ),
-                                                  style: TextStyle(
-                                                    fontSize: 12,
-                                                    color: Colors.grey[700],
-                                                    fontStyle: FontStyle.italic,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          );
-                                        },
-                                      ),
-                            ),
-                            // Button to add a new evolution photo.
-                            action: TextButton.icon(
-                              onPressed: () => _addEvolutionPhoto(),
-                              icon: const Icon(Icons.add_a_photo),
-                              label: const Text("Add Photo"),
-                            ),
+                        ),
+                        const SizedBox(height: 12),
+                        // Button to delete the plant.
+                        ElevatedButton.icon(
+                          onPressed: _confirmDeletePlant,
+                          icon: const Icon(Icons.delete, color: Colors.white),
+                          label: const Text(
+                            'Delete Plant',
+                            style: TextStyle(color: Colors.white),
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  // Button to delete the plant.
-                  ElevatedButton.icon(
-                    onPressed: () => _confirmDeletePlant(),
-                    icon: const Icon(Icons.delete, color: Colors.white),
-                    label: const Text(
-                      'Delete Plant',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red[400],
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red[400],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
-          ],
-        ),
-      ),
     );
   } // end build method().
 
@@ -514,14 +471,15 @@ class _SpecificGardenPlantPageState
         // Get the bytes of the image file.
         final imageBytes = file.bytes ?? await File(imagePath).readAsBytes();
         if (!mounted) return;
+        final ext = file.extension;
 
         // Upload the image to Supabase storage. As a result, it returns
         // the URL of the uploaded image.
         final newMainPhotoUrl = await GardenPlant.uploadImage(
           imageBytes: imageBytes,
           imageType: "profile",
-          plantId: currentPlant.id,
-          fileName: "profile_${currentPlant.id}",
+          plantId: currentPlant!.id,
+          fileNameWithExt: "profile_${currentPlant.id}.$ext",
         );
         if (!mounted) return;
 
@@ -538,7 +496,7 @@ class _SpecificGardenPlantPageState
           selectedGardenPlantProvider(widget.plantId),
         );
         // Change the main photo URL of the plant.
-        final updatedPlant = plantToUpdate.copyWith(
+        final updatedPlant = plantToUpdate!.copyWith(
           mainPhotoUrl: newMainPhotoUrl,
         );
         // Update the plant in the provider.
@@ -610,6 +568,7 @@ class _SpecificGardenPlantPageState
       );
       // Get the bytes of the image file.
       final imageBytes = imageFile.bytes ?? await File(imagePath).readAsBytes();
+      final ext = imageFile.extension;
       if (!mounted) return;
 
       final timestamp = DateTime.now();
@@ -626,8 +585,8 @@ class _SpecificGardenPlantPageState
       final newImageUrl = await GardenPlant.uploadImage(
         imageBytes: imageBytes,
         imageType: "evolution",
-        plantId: currentPlant.id,
-        fileName: safeFileName,
+        plantId: currentPlant!.id,
+        fileNameWithExt: "$safeFileName.$ext",
       );
       // Check if the widget is still mounted after the async operation.
       if (!mounted) return;
@@ -648,6 +607,7 @@ class _SpecificGardenPlantPageState
             noteController.text.trim().isNotEmpty
                 ? noteController.text.trim()
                 : null,
+        storagePath: 'user-plants-images/plant_${currentPlant.id}/evolution/$safeFileName.jpg',
       );
       // Update the plant's photos list with the new photo.
       final List<PlantPhoto> updatedPhotos = [
@@ -675,7 +635,7 @@ class _SpecificGardenPlantPageState
   // Function to show a dialog with the evolution photo in detail.
   Future<void> _showEvolutionPhotoDialog(int photoIndex) async {
     final myGardenPlant = ref.read(selectedGardenPlantProvider(widget.plantId));
-    final evolutionPhoto = myGardenPlant.photos![photoIndex];
+    final evolutionPhoto = myGardenPlant!.photos![photoIndex];
 
     final navigator = Navigator.of(context);
     final scaffoldMessenger = ScaffoldMessenger.of(context);
@@ -698,29 +658,42 @@ class _SpecificGardenPlantPageState
                       child: Hero(
                         tag: evolutionPhoto.imageUrl,
                         // This widget allows the user for zooming and panning.
-                        child: InteractiveViewer(
-                          panEnabled: true,
-                          minScale: 0.5,
-                          maxScale: 4.0,
-                          child: Image.network(
-                            evolutionPhoto.imageUrl,
-                            fit: BoxFit.cover,
-                            errorBuilder:
-                                (ctx, err, st) => const Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.broken_image,
-                                        size: 100,
-                                        color: Colors.red,
-                                      ),
-                                      SizedBox(height: 8),
-                                      Text("Error loading image"),
-                                    ],
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            final maxWidth = MediaQuery.of(context).size.width * 0.6;
+                            final maxHeight = MediaQuery.of(context).size.width * 0.3;
+                            return Center(
+                              child: SizedBox(
+                                width: maxWidth,
+                                height: maxHeight,
+                                child: InteractiveViewer(
+                                  panEnabled: true,
+                                  minScale: 0.5,
+                                  maxScale: 4.0,
+                                  child: Image.network(
+                                    evolutionPhoto.imageUrl,
+                                    fit: BoxFit.contain,
+                                    errorBuilder:
+                                        (ctx, err, st) => const Center(
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Icon(
+                                                Icons.broken_image,
+                                                size: 100,
+                                                color: Colors.red,
+                                              ),
+                                              SizedBox(height: 8),
+                                              Text("Error loading image"),
+                                            ],
+                                          ),
+                                        ),
                                   ),
                                 ),
-                          ),
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ),
@@ -741,10 +714,7 @@ class _SpecificGardenPlantPageState
                 if (evolutionPhoto.note != null &&
                     evolutionPhoto.note!.isNotEmpty)
                   Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0,
-                      vertical: 8.0,
-                    ),
+                    padding: const EdgeInsets.all(8.0),
                     child: Text(
                       evolutionPhoto.note!,
                       style: const TextStyle(fontSize: 16),
@@ -769,8 +739,7 @@ class _SpecificGardenPlantPageState
                     onPressed: () async {
                       // Asking for confirmation before deleting the photo.
                       final confirmDelete = await showDialog<bool>(
-                        context:
-                            dialogContext, 
+                        context: dialogContext,
                         builder:
                             (confirmCtx) => AlertDialog(
                               title: const Text(
@@ -803,24 +772,18 @@ class _SpecificGardenPlantPageState
                       // The user confirmed the deletion of the evolution pic.
                       if (confirmDelete == true) {
                         try {
-                          Uri uri = Uri.parse(evolutionPhoto.imageUrl);
-                          String pathInBucket = uri.pathSegments
-                              .sublist(
-                                uri.pathSegments.indexOf('user-plants-images') +
-                                    1,
-                              )
-                              .join('/');
-
                           bool deletedFromStorage =
-                              await GardenPlant.deleteImageFromStorage(pathInBucket);
-                          // The photo was deleted from storage and the provider 
-                          // will be updated accordingly.
+                              await GardenPlant.deleteImageFromStorage(
+                                evolutionPhoto.storagePath ?? '',
+                              );
+                          // If the photo was deleted successfully from storage,
+                          // we update the plant data in the provider.
                           if (deletedFromStorage) {
                             final currentPlantData = ref.read(
                               selectedGardenPlantProvider(widget.plantId),
                             );
                             List<PlantPhoto> updatedPhotosList = List.from(
-                              currentPlantData.photos ?? [],
+                              currentPlantData!.photos ?? [],
                             );
                             if (photoIndex >= 0 &&
                                 photoIndex < updatedPhotosList.length) {
@@ -848,8 +811,6 @@ class _SpecificGardenPlantPageState
                           }
                         }
                       }
-                      // Se confirmDelete è false, non fare nulla, il dialogo della foto rimane aperto
-                      // a meno che non si voglia chiuderlo con .cancelled. Per ora, lo lasciamo aperto.
                     },
                   ),
                 ),
@@ -861,9 +822,8 @@ class _SpecificGardenPlantPageState
       },
     );
 
-    // DOPO CHE showDialog (per la foto ingrandita) SI È COMPLETATO
     if (!mounted) {
-      return; // Protegge l'uso di pageContext (per ScaffoldMessenger)
+      return; 
     }
 
     if (result == _PhotoActionDialogResult.deleted) {
@@ -877,14 +837,13 @@ class _SpecificGardenPlantPageState
         ),
       );
     }
-    // Nessuna azione per .cancelled o null (se barrierDismissible chiude il dialogo)
-  }
+  } // end _showEvolutionPhotoDialog method.
 
   // This function allows the user to edit a note of the plant.
   Future<void> _editNoteDialog(int index) async {
     final myGardenPlant = ref.read(selectedGardenPlantProvider(widget.plantId));
     final controller = TextEditingController(
-      text: myGardenPlant.notes?[index] ?? '',
+      text: myGardenPlant!.notes?[index] ?? '',
     );
     await showDialog(
       context: context,
@@ -909,7 +868,7 @@ class _SpecificGardenPlantPageState
                   if (myGardenPlant.notes == null ||
                       index < 0 ||
                       index >= myGardenPlant.notes!.length) {
-                    Navigator.of(dialogContext).pop(); 
+                    Navigator.of(dialogContext).pop();
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('Note not found or changed.'),
@@ -925,7 +884,7 @@ class _SpecificGardenPlantPageState
                       .read(gardenPlantsProvider.notifier)
                       .updatePlant(updated);
 
-                  if (!mounted) return; 
+                  if (!mounted) return;
                   if (dialogContext.mounted) {
                     Navigator.of(dialogContext).pop();
                   }
@@ -935,14 +894,11 @@ class _SpecificGardenPlantPageState
             ],
           ),
     );
-    controller.dispose(); 
+    controller.dispose();
   } // end _editNoteDialog method.
-
-
 
   // Function to add a new note to the plant.
   Future<void> _addNoteDialog() async {
-
     final controller = TextEditingController();
     await showDialog(
       context: context,
@@ -965,14 +921,14 @@ class _SpecificGardenPlantPageState
                   final navigator = Navigator.of(dialogContext);
                   final newNote = controller.text.trim();
                   if (newNote.isEmpty) {
-                      navigator.pop();
+                    navigator.pop();
                     return;
                   }
                   final currentPlant = ref.read(
                     selectedGardenPlantProvider(widget.plantId),
                   );
                   final List<String> updatedNotes = [
-                    ...currentPlant.notes ?? [],
+                    ...currentPlant!.notes ?? [],
                     newNote,
                   ];
                   // Update the plant with the new note.
@@ -991,11 +947,9 @@ class _SpecificGardenPlantPageState
     controller.dispose();
   } // end _addNoteDialog method.
 
-
-
   // Function to confirm the deletion of a note.
   Future<void> _confirmDeleteNote(int index) async {
-    final scaffoldMessenger = ScaffoldMessenger.of(context); 
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -1023,7 +977,7 @@ class _SpecificGardenPlantPageState
       final currentPlant = ref.read(
         selectedGardenPlantProvider(widget.plantId),
       );
-      if (currentPlant.notes == null ||
+      if (currentPlant!.notes == null ||
           index < 0 ||
           index >= currentPlant.notes!.length) {
         scaffoldMessenger.showSnackBar(
@@ -1037,14 +991,12 @@ class _SpecificGardenPlantPageState
     }
   } // end _confirmDeleteNote method.
 
-
-
   // Function to edit the position of the plant in the garden.
   Future<void> _editPositionDialog() async {
     final myGardenPlant = ref.read(selectedGardenPlantProvider(widget.plantId));
 
     final controller = TextEditingController(
-      text: myGardenPlant.position ?? '',
+      text: myGardenPlant!.position ?? '',
     );
     await showDialog(
       context: context,
@@ -1078,11 +1030,11 @@ class _SpecificGardenPlantPageState
             ],
           ),
     );
-    controller.dispose(); 
+    controller.dispose();
   } // end _editPositionDialog method.
 
   Future<void> _confirmDeletePlant() async {
-    final navigator = Navigator.of(context); // Cattura per pop della pagina
+    final navigator = Navigator.of(context);
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -1111,31 +1063,15 @@ class _SpecificGardenPlantPageState
 
     if (!mounted) return;
     if (confirmed == true) {
-      // TODO: Implementare l'eliminazione di TUTTE le foto della pianta dallo storage
-      // prima di eliminare la pianta dal DB.
-      // Esempio concettuale:
-      // if (plant.photos != null) {
-      //   for (var photo in plant.photos!) {
-      //     Uri uri = Uri.parse(photo.imageUrl);
-      //     String pathInBucket = uri.pathSegments.sublist(uri.pathSegments.indexOf('user-plants-images') + 1).join('/');
-      //     await GardenPlant.deleteImageFromStorage(pathInBucket);
-      //   }
-      // }
-      // if (plant.mainPhotoUrl != null && plant.mainPhotoUrl!.isNotEmpty){
-      //    Uri uri = Uri.parse(plant.mainPhotoUrl!);
-      //    String pathInBucket = uri.pathSegments.sublist(uri.pathSegments.indexOf('user-plants-images') + 1).join('/');
-      //    await GardenPlant.deleteImageFromStorage(pathInBucket);
-      // }
       final myGardenPlant = ref.read(
         selectedGardenPlantProvider(widget.plantId),
       );
 
-      await ref.read(gardenPlantsProvider.notifier).removePlant(myGardenPlant);
+      await ref.read(gardenPlantsProvider.notifier).removePlant(myGardenPlant!);
       if (!mounted) return;
-      navigator.pop(); // Torna indietro dalla pagina della pianta
+      navigator.pop(true); 
     }
   } // end _confirmDeletePlant method.
-
 
   // Function to add a watering record to the plant.
   Future<void> _addWateringRecordDialog() async {
@@ -1169,7 +1105,7 @@ class _SpecificGardenPlantPageState
                     selectedGardenPlantProvider(widget.plantId),
                   );
                   final List<WateringRecord> updatedRecords = [
-                    ...currentPlant.wateringRecords ?? [],
+                    ...currentPlant!.wateringRecords ?? [],
                     WateringRecord(date: DateTime.now(), amount: quantity ?? 0),
                   ];
                   final GardenPlant updatedPlantData = currentPlant.copyWith(

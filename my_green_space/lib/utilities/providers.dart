@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:my_green_space/models/garden_plant.dart';
 import 'package:my_green_space/models/plant.dart';
@@ -132,9 +133,9 @@ final selectedGardenPlantProvider = Provider<GardenPlant>((ref) {
 });
 */
 
-final selectedGardenPlantProvider = Provider.family<GardenPlant, String>((ref, plantId) {
+final selectedGardenPlantProvider = Provider.family<GardenPlant?, String>((ref, plantId) {
   final allPlants = ref.watch(gardenPlantsProvider);
-  return allPlants.firstWhere(
+  return allPlants.firstWhereOrNull(
     (plant) => plant.id == plantId,
   );
 });

@@ -67,6 +67,8 @@ flutter:
   assets:
     - images/plants/
     - images/No_Image_Available.jpg
+    - images/garden.jpg
+    - images/plant_homepage.jpg
     - assets/plants.json
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg

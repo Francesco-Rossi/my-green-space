@@ -1,9 +1,12 @@
 import 'dart:typed_data';
-import 'package:flutter/material.dart'; // Per debugPrint
-import 'package:my_green_space/utilities/support_types.dart'; // Assicurati che il percorso sia corretto
+import 'package:flutter/material.dart'; 
+import 'package:my_green_space/utilities/support_types.dart'; 
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
+// This class represents a plant in the user's garden, and include parameters
+// such as  the type, the planting date, the notes, the position, 
+// the photos showing its evolution and watering records.
 class GardenPlant {
   final String id;
   final String plantType;
@@ -26,6 +29,7 @@ class GardenPlant {
   })  : id = id ?? const Uuid().v4(),
         plantingDate = plantingDate ?? DateTime.now();
 
+  // Method to create a copy of the GardenPlant with optional modifications.
   GardenPlant copyWith({
     List<String>? notes,
     String? position,
@@ -43,8 +47,9 @@ class GardenPlant {
       photos: photos ?? this.photos,
       wateringRecords: wateringRecords ?? this.wateringRecords,
     );
-  }
+  } // end copyWith.
 
+  // Factory constructor to create a GardenPlant from a JSON object.
   factory GardenPlant.fromJson(Map<String, dynamic> jsonItem) {
     return GardenPlant(
       id: jsonItem['id'] as String,
@@ -73,6 +78,7 @@ class GardenPlant {
     );
   }
 
+  // Method to convert the GardenPlant to a JSON object.
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -93,30 +99,33 @@ class GardenPlant {
     };
   }
 
+  // Method that uploads an image to Supabase storage. It returns
+  // the public URL of the uploaded image.
+  // The image can be either a profile picture or an evolution photo.
   static Future<String?> uploadImage({
     required Uint8List imageBytes,
     required String imageType, // "profile" or "evolution"
     required String plantId,
-    required String fileName, // Nome base senza estensione
+    required String fileNameWithExt, 
   }) async {
     try {
       final storage = Supabase.instance.client.storage;
       const bucketId = 'user-plants-images';
       late final String path;
-      final String fullFileNameWithExt = '$fileName.jpg'; // Aggiungi estensione
 
-      // Struttura path coerente: plants/<plantId>/<imageType>/<fileName>
-      path = 'plants/$plantId/$imageType/$fullFileNameWithExt';
+      // Path in the storage bucket.
+      path = 'plants/plant_$plantId/$imageType/$fileNameWithExt';
 
       if (imageType == 'profile') {
-        // Se è una foto profilo, elimina le vecchie foto profilo per questa pianta
-        final String dirPath = 'plants/$plantId/profile';
+        // If the image is a profile picture, we need to delete any existing
+        // profile images
+        final String dirPath = 'plants/plant_$plantId/profile';
         try {
           final fileList = await storage.from(bucketId).list(path: dirPath);
           if (fileList.isNotEmpty) {
-            // Non eliminare il file che stiamo per caricare se ha lo stesso nome (improbabile con timestamp)
+            // All files in the profile directory except the one being uploaded.
             final pathsToDelete = fileList
-                .where((f) => f.name != fullFileNameWithExt) // Evita di auto-eliminare se il nome è identico (raro)
+                .where((f) => f.name != fileNameWithExt) 
                 .map((f) => '$dirPath/${f.name}')
                 .toList();
             if (pathsToDelete.isNotEmpty) {
@@ -128,15 +137,16 @@ class GardenPlant {
           debugPrint("Error deleting old profile images in $dirPath: $e");
           // Non bloccare l'upload per questo, ma loggalo.
         }
-      }
+      } 
 
       debugPrint("Uploading image to path: $path");
+      // Upload the image to the specified path in the storage bucket.
       await storage.from(bucketId).uploadBinary(
             path,
             imageBytes,
             fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
           );
-
+      // Get the public URL of the uploaded image.
       final publicUrl = storage.from(bucketId).getPublicUrl(path);
       debugPrint("Image uploaded successfully: $publicUrl");
       return "$publicUrl?updated=${DateTime.now().millisecondsSinceEpoch}"; // Per cache busting
@@ -144,8 +154,9 @@ class GardenPlant {
       debugPrint("Exception during image upload ($imageType for $plantId): $e");
       return null;
     }
-  }
+  } // end uploadImage.
 
+  // Method to delete an image from Supabase storage.
   static Future<bool> deleteImageFromStorage(String pathInBucket) async {
     try {
       final storage = Supabase.instance.client.storage;
@@ -154,14 +165,12 @@ class GardenPlant {
       debugPrint("Attempting to delete image from storage at path: $pathInBucket");
       final List<FileObject> result = await storage.from(bucketId).remove([pathInBucket]);
 
-      // remove() restituisce una lista degli oggetti eliminati.
-      // Se il file non esiste, la lista è vuota e non c'è errore.
       if (result.isNotEmpty) {
         debugPrint("Image deleted successfully from storage: ${result.first.name}");
         return true;
       } else {
         debugPrint("Image not found (or already deleted) at path: $pathInBucket. Considered successful for client.");
-        return true; // Se non c'è, per il client è come se fosse stato eliminato.
+        return true; 
       }
     } catch (e) {
       debugPrint("Exception during image deletion from storage ($pathInBucket): $e");

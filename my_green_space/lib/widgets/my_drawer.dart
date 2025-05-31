@@ -4,11 +4,11 @@ import 'package:my_green_space/pages/homepage.dart';
 import 'package:my_green_space/pages/plant_catalog_page.dart';
 
 // The MyDrawer widget defines the application's main navigation drawer.
-// It is accessible from every page, providing a consistent way 
+// It is accessible from every page, providing a consistent way
 // for users to move between major sections of the app.
-// When a user goes to another page, the previous page is completely replaced 
+// When a user goes to another page, the previous page is completely replaced
 // using pushAndRemoveUntil, ensuring a clean navigation hierarchy without the stack mode.
-// This approach keeps only one main page active at a time and avoids unnecessary 
+// This approach keeps only one main page active at a time and avoids unnecessary
 // back navigation.
 
 class MyDrawer extends StatelessWidget {
@@ -22,7 +22,37 @@ class MyDrawer extends StatelessWidget {
       child: ListView(
         // padding: EdgeInsets.zero,
         children: [
-          const DrawerHeader(child: Text("ciao")),
+          const DrawerHeader(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('images/garden.jpg'),
+                fit: BoxFit.cover,
+                colorFilter: ColorFilter.mode(
+                  Color.fromRGBO(0, 0, 0, 0.4),
+                  BlendMode.darken,
+                ),
+              ),
+            ),
+            child: Align(
+              alignment: Alignment.bottomLeft,
+              child: Text(
+                'My Green Space',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black54,
+                      offset: Offset(0, 1),
+                      blurRadius: 4,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
           ListTile(
             leading: const Icon(Icons.home),
             title: const Text("Home"),
