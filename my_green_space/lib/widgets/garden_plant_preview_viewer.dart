@@ -51,7 +51,7 @@ class GardenPlantPreviewViewer extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                //mainAxisAlignment: MainAxisAlignment.start,
+                // mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // Plant type in bold.
                   Text(
@@ -131,12 +131,12 @@ class GardenPlantPreviewViewer extends ConsumerWidget {
                         icon: Icons.photo_camera,
                         text: '${gardenPlant.photos?.length ?? 0}',
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: 8),
                       _InfoIconText(
                         icon: Icons.water_drop,
                         text: '${gardenPlant.wateringRecords?.length ?? 0}',
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: 8),
                       _InfoIconText(
                         icon: Icons.note,
                         text: '${gardenPlant.notes?.length ?? 0}',

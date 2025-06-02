@@ -41,6 +41,7 @@ class PlantPreviewViewer extends ConsumerWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
+                      // mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           plant.name,
@@ -48,40 +49,68 @@ class PlantPreviewViewer extends ConsumerWidget {
                             fontWeight: FontWeight.bold,
                             fontSize: 20,
                           ),
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 15),
                         if (plant.description != null)
-                          Text(
-                            plant.description!,
-                            style: const TextStyle(
-                              color: Colors.black54,
-                              fontSize: 15,
-                            ),
-                            maxLines: 15,
-                            overflow: TextOverflow.ellipsis,
+                          LayoutBuilder(
+                            builder: (
+                              BuildContext context,
+                              BoxConstraints constraints,
+                            ) {
+                              int maxLinesDescription;
+                              // debugPrint("SCREEN: ${constraints.maxWidth}");
+                              // Adapting the number of lines based on the width of the screen
+                              if (constraints.maxWidth < 100) {
+                                maxLinesDescription = 4;
+                              } else if (constraints.maxWidth < 150) {
+                                maxLinesDescription = 8;
+                              } else {
+                                maxLinesDescription = 13;
+                              }
+                              return Text(
+                                plant.description!,
+                                style: const TextStyle(
+                                  color: Colors.black54,
+                                  fontSize: 15,
+                                ),
+                                maxLines: maxLinesDescription,
+                                overflow: TextOverflow.ellipsis,
+                              );
+                            },
                           ),
                         const SizedBox(height: 20),
-                        // Display some of the tags associated with the plant.
+                        // Display of some tags associated to  the plant.
                         Wrap(
-                          spacing: 4,
-                          runSpacing: 2,
+                          spacing: 4.0,
+                          runSpacing: 4.0,
                           children:
-                              plant.tags
-                                  .take(3)
-                                  .map(
-                                    (tag) => Chip(
-                                      label: Text(
-                                        tag,
-                                        style: const TextStyle(fontSize: 12),
-                                      ),
-                                      visualDensity: VisualDensity.compact,
-                                      materialTapTargetSize:
-                                          MaterialTapTargetSize.shrinkWrap,
-                                      padding: EdgeInsets.zero,
+                              plant.tags.take(2).map((tag) {
+                                return Chip(
+                                  label: Text(
+                                    tag,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w500,
                                     ),
-                                  )
-                                  .toList(),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  ),
+                                  backgroundColor: Colors.green.shade300,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  visualDensity: VisualDensity.compact,
+                                  materialTapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 0,
+                                  ),
+                                );
+                              }).toList(),
                         ),
                       ],
                     ),

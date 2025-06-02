@@ -2,10 +2,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:my_green_space/models/garden_plant.dart';
 import 'package:my_green_space/utilities/providers.dart';
-import 'package:my_green_space/utilities/support_types.dart';
-import 'package:uuid/uuid.dart';
+
 
 // This page allows the user to add a new plant to its garden,
 // by compiling a form with the plant's details.
@@ -30,7 +28,7 @@ class _AddGardenPlantPageState extends ConsumerState<AddGardenPlantPage> {
   // List to hold notes added by the user.
   final List<String> notesList = [];
   // Extension for the image file, used when uploading the image.
-  late String imageExt; 
+  late String imageExt;
   // Variable to hold the custom image (that is a list of bytes)
   // if the user selects an image.
   Uint8List? customImageBytes;
@@ -55,13 +53,9 @@ class _AddGardenPlantPageState extends ConsumerState<AddGardenPlantPage> {
 
   // Asynchronous method to pick an image from the file system.
   Future<void> pickImage() async {
-    // Use the file picker to select an image file. 
-    // The result contains the selected file's data.
     final result = await FilePicker.platform.pickFiles(type: FileType.image);
-    imageExt = result?.files.single.extension ?? ''; 
+    imageExt = result?.files.single.extension ?? '';
 
-    // If the user selected a file and it has bytes, update the state.
-    // The method setState triggers the rebuild of the widget.
     if (result != null && result.files.single.bytes != null) {
       setState(() {
         customImageBytes = result.files.single.bytes!;
@@ -72,7 +66,6 @@ class _AddGardenPlantPageState extends ConsumerState<AddGardenPlantPage> {
   // Method to add a note to the notes list.
   void addNote() {
     final text = notesController.text.trim();
-    // Only add the note if the text is not empty.
     if (text.isNotEmpty) {
       setState(() {
         notesList.add(text);
@@ -81,238 +74,168 @@ class _AddGardenPlantPageState extends ConsumerState<AddGardenPlantPage> {
     }
   } // end addNote method.
 
-  @override
-  Widget build(BuildContext context) {
-    debugPrint("Building AddGardenPlantPage...");
-    final plantType = ref.watch(selectedPlantProvider);
 
-    return Scaffold(
-      appBar: AppBar(title: Text("Adding ${plantType.name} to my garden...")),
-      // The layout is a Row with two main sections:
-      // the left side for the image and the right side for the form.
-      body: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Left side for the plant image and the button to change it.
-          Expanded(
-            flex: 1,
-            child: Padding(
-              padding: const EdgeInsets.all(40),
-              child: Column(
-                children: [
-                  Expanded(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      // Display the custom image if available,
-                      // otherwise display the default image for the plant type.
-                      child:
-                          customImageBytes != null
-                              ? Image.memory(
-                                customImageBytes!,
-                                fit: BoxFit.cover,
-                              )
-                              : plantType.imageAsset != null &&
-                                  plantType.imageAsset!.isNotEmpty
-                              ?  
-                                Image.asset(
-                                plantType.imageAsset!,
-                                fit: BoxFit.cover,
-                              )
-                              : Image.asset(
-                                "images/No_Image_Available.jpg",
-                                fit: BoxFit.cover,
-                              ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  ElevatedButton.icon(
-                    onPressed: pickImage,
-                    icon: const Icon(Icons.upload),
-                    label: const Text("Change Image"),
-                  ),
-                ],
-              ),
+@override
+Widget build(BuildContext context) {
+  final plantType = ref.watch(selectedPlantProvider);
+  final screenWidth = MediaQuery.of(context).size.width;
+  final orientation = MediaQuery.of(context).orientation;
+  final isPortrait = orientation == Orientation.portrait;
+  final isSmallWideScreen = !isPortrait && screenWidth <= 850;
+
+  final double paddingValue = isSmallWideScreen ? 12 : 24;
+  final double fontSize = isSmallWideScreen ? 16 : 24;
+  final buttonStyle = ElevatedButton.styleFrom(
+    padding: EdgeInsets.symmetric(
+      horizontal: isSmallWideScreen ? 10 : 20,
+      vertical: isSmallWideScreen ? 5 : 10,
+    ),
+    backgroundColor: Colors.green[700],
+    textStyle: TextStyle(fontSize: isSmallWideScreen ? 12 : 16),
+  );
+
+  final imageWidget = ClipRRect(
+    borderRadius: BorderRadius.circular(20),
+    child: customImageBytes != null
+        ? Image.memory(customImageBytes!, fit: BoxFit.cover)
+        : plantType.imageAsset != null && plantType.imageAsset!.isNotEmpty
+            ? Image.asset(plantType.imageAsset!, fit: BoxFit.cover)
+            : Image.asset("images/No_Image_Available.jpg", fit: BoxFit.cover),
+  );
+
+  final changeImageButton = ElevatedButton.icon(
+    onPressed: pickImage,
+    icon: const Icon(Icons.upload),
+    label: Text("Change Image", style: TextStyle(fontSize: isSmallWideScreen ? 14 : 16)),
+    style: buttonStyle,
+  );
+
+  final formSection = Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text("Planting Date", style: TextStyle(fontWeight: FontWeight.bold, fontSize: fontSize)),
+      const SizedBox(height: 12),
+      GestureDetector(
+        onTap: () async {
+          final picked = await showDatePicker(
+            context: context,
+            initialDate: plantingDate,
+            firstDate: DateTime(2000),
+            lastDate: DateTime.now(),
+          );
+          if (picked != null) setState(() => plantingDate = picked);
+        },
+        child: AbsorbPointer(
+          child: TextFormField(
+            decoration: InputDecoration(
+              hintText: "${plantingDate.toLocal()}".split(' ')[0],
+              prefixIcon: const Icon(Icons.calendar_today),
+              border: const OutlineInputBorder(),
             ),
           ),
-          // Right side for the form inputs.
+        ),
+      ),
+      const SizedBox(height: 18),
+      Text("Position", style: TextStyle(fontWeight: FontWeight.bold, fontSize: fontSize)),
+      const SizedBox(height: 12),
+      TextField(
+        controller: positionController,
+        decoration: const InputDecoration(hintText: "Add a position", border: OutlineInputBorder()),
+      ),
+      const SizedBox(height: 18),
+      Text("Notes", style: TextStyle(fontWeight: FontWeight.bold, fontSize: fontSize)),
+      const SizedBox(height: 12),
+      Row(
+        children: [
           Expanded(
-            flex: 1,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 40, right: 40, top: 50),
-              child: Column(
-                children: [
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Planting Date",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 24,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          GestureDetector(
-                            onTap: () async {
-                              final picked = await showDatePicker(
-                                context: context,
-                                initialDate: plantingDate,
-                                firstDate: DateTime(2000),
-                                lastDate: DateTime.now(),
-                              );
-                              if (picked != null) {
-                                setState(() => plantingDate = picked);
-                              }
-                            },
-                            child: AbsorbPointer(
-                              child: TextFormField(
-                                decoration: InputDecoration(
-                                  // Display the selected date in a user-friendly format.
-                                  hintText:
-                                      "${plantingDate.toLocal()}".split(' ')[0],
-                                  prefixIcon: const Icon(Icons.calendar_today),
-                                  border: const OutlineInputBorder(),
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          const SizedBox(height: 18),
-
-                          const Text(
-                            "Position",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 24,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          TextField(
-                            controller: positionController,
-                            decoration: const InputDecoration(
-                              hintText: "Add a position",
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-
-                          const SizedBox(height: 18),
-
-                          const Text(
-                            "Notes",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 24,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TextField(
-                                  controller: notesController,
-                                  decoration: const InputDecoration(
-                                    hintText: "Add a note",
-                                    border: OutlineInputBorder(),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              ElevatedButton(
-                                onPressed: addNote,
-                                child: const Text("Add"),
-                              ),
-                            ],
-                          ),
-                          // Display the list of notes added by the user.
-                          // The user can also delete the notes he has added.
-                          const SizedBox(height: 10),
-                          ...notesList.map(
-                            (note) => ListTile(
-                              contentPadding: EdgeInsets.zero,
-                              title: Text(note),
-                              trailing: IconButton(
-                                icon: const Icon(Icons.delete),
-                                onPressed: () {
-                                  setState(() {
-                                    notesList.remove(note);
-                                  });
-                                },
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Center(
-                    child: ElevatedButton.icon(
-                      // When the user clicks this button, a new GardenPlant
-                      // instance is created, and the respective provider is updated.
-                      onPressed: () async {
-                        final navigator = Navigator.of(context);
-                        final String? newUrl;
-                        Uint8List? imageToSave;
-                        String plantId = const Uuid().v4();
-                
-
-                        // Setting the image to save.
-                        if (customImageBytes != null) {
-                          imageToSave = customImageBytes!;
-                        } else if (plantType.imageAsset != null && plantType.imageAsset!.isNotEmpty) {
-                          imageToSave = await loadImageBytesFromAsset(plantType.imageAsset!);
-                        } else {
-                          imageToSave = await loadImageBytesFromAsset("images/No_Image_Available.jpg");
-                        } 
-                        if (imageExt == '') {
-                          imageExt = 'jpg'; // Default to jpg if no extension is provided.
-                        }
-                        // Upload the image to the storage and get the URL.
-                        newUrl = await GardenPlant.uploadImage(
-                          imageBytes: imageToSave,
-                          imageType: 'profile',
-                          plantId: plantId,
-                          fileNameWithExt: "${plantType.name}_$plantId.$imageExt",
-                        );
-                        // Create a new GardenPlant instance with the form data.
-                        final newGardenPlant = GardenPlant(
-                          id: plantId,
-                          plantType: plantType.name,
-                          plantingDate: plantingDate,
-                          mainPhotoUrl: newUrl ?? '',
-                          notes: notesList,
-                          position:
-                              positionController.text.trim().isNotEmpty
-                                  ? positionController.text.trim()
-                                  : null,
-                        );
-                        // Updating the gardenPlantsProvider.
-                        ref
-                            .read(gardenPlantsProvider.notifier)
-                            .addPlant(newGardenPlant);
-                        if (!mounted) return;
-                        navigator.pop(true);
-                        //Navigator.pop(context, true);
-                      },
-                      icon: const Icon(Icons.check),
-                      label: const Text("Add to Garden"),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 30,
-                          vertical: 16,
-                        ),
-                        backgroundColor: Colors.green[700],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            child: TextField(
+              controller: notesController,
+              decoration: const InputDecoration(hintText: "Add a note", border: OutlineInputBorder()),
             ),
+          ),
+          const SizedBox(width: 8),
+          ElevatedButton(
+            onPressed: addNote,
+            style: buttonStyle,
+            child: Text("Add", style: TextStyle(fontSize: isSmallWideScreen ? 14 : 16)),
           ),
         ],
       ),
-    );
-  } // end build method.
+      const SizedBox(height: 10),
+      ...notesList.map(
+        (note) => ListTile(
+          contentPadding: EdgeInsets.zero,
+          title: Text(note, style: TextStyle(fontSize: isSmallWideScreen ? 14 : 16)),
+          trailing: IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: () => setState(() => notesList.remove(note)),
+          ),
+        ),
+      ),
+    ],
+  );
+
+  final addButton = Center(
+    child: ElevatedButton.icon(
+      onPressed: () async {
+      },
+      icon: const Icon(Icons.check),
+      label: Text("Add to Garden", style: TextStyle(fontSize: isSmallWideScreen ? 14 : 16)),
+      style: buttonStyle,
+    ),
+  );
+
+  return Scaffold(
+    appBar: AppBar(title: Text("Adding ${plantType.name} to my garden...")),
+    body: isPortrait
+        ? SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.all(paddingValue),
+              child: Column(
+                children: [
+                  AspectRatio(aspectRatio: 16 / 9, child: imageWidget),
+                  const SizedBox(height: 12),
+                  changeImageButton,
+                  const SizedBox(height: 24),
+                  formSection,
+                  const SizedBox(height: 24),
+                  addButton,
+                ],
+              ),
+            ),
+          )
+        : Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                flex: isSmallWideScreen ? 2 : 1,
+                child: Padding(
+                  padding: EdgeInsets.all(paddingValue),
+                  child: Column(
+                    children: [
+                      Expanded(child: imageWidget),
+                      SizedBox(height: isSmallWideScreen ? 8 : 12),
+                      changeImageButton,
+                    ],
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: isSmallWideScreen ? 3 : 1,
+                child: Padding(
+                  padding: EdgeInsets.all(paddingValue),
+                  child: Column(
+                    children: [
+                      Expanded(child: SingleChildScrollView(child: formSection)),
+                      const SizedBox(height: 12),
+                      addButton,
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+  );
+}
+
 } // end _AddGardenPlantPageState.

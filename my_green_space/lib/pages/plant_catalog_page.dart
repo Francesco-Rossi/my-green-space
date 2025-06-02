@@ -17,17 +17,23 @@ class PlantCatalogPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     debugPrint("Building PlantCatalogPage...");
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
 
     return Scaffold(
       appBar: AppBar(title: const Text("Plant Catalog")),
       drawer: const MyDrawer(),
-      body: const Padding(
-        padding: EdgeInsets.all(8.0),
-        child: Column(
+      body: Padding(
+        padding: EdgeInsets.only(
+          top: isLandscape ? 0.0 : 6.0,
+          left: 10,
+          right: 10,
+        ),
+        child: const Column(
           children: [
             SizedBox(height: 8),
             _MyTagFilterChips(),
-            SizedBox(height: 16),
+            SizedBox(height: 8),
             _VisiblePlantsCounter(),
             SizedBox(height: 8),
             Expanded(child: _PlantGridView()),
@@ -50,34 +56,134 @@ class _MyTagFilterChips extends ConsumerWidget {
     final allTags = ref.watch(allTagsProvider);
     final selectedTags = ref.watch(selectedTagsProvider);
 
-    return Wrap(
-      spacing: 10.0,
-      runSpacing: 6.0,
-      // For each tag, we create a FilterChip widget.
-      children:
-          allTags.map((tag) {
-            final isSelected = selectedTags.contains(tag);
-            return FilterChip(
-              label: Text(tag),
-              selected: isSelected,
-              // Function to call when the chip is selected or deselected.
-              onSelected: (_) {
-                debugPrint("Tag selected before: $selectedTags");
-                final currentTags = [...selectedTags];
-                if (isSelected) {
-                  currentTags.remove(tag);
-                } else {
-                  currentTags.add(tag);
-                }
-                // The provider is updated with the new list of selected tags.
-                ref.read(selectedTagsProvider.notifier).state = currentTags;
-                debugPrint("Tag selected after: $currentTags");
-              },
-            );
-          }).toList(),
+    final List<Widget> filterChips =
+        allTags.map((tag) {
+          final isSelected = selectedTags.contains(tag);
+          return FilterChip(
+            label: Text(tag),
+            selected: isSelected,
+            selectedColor: Colors.green.shade200,
+            backgroundColor: Colors.grey.shade200,
+            labelStyle: TextStyle(
+              color: isSelected ? Colors.green.shade800 : Colors.black87,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: BorderSide(
+                color:
+                    isSelected ? Colors.green.shade400 : Colors.grey.shade400,
+                width: 1.0,
+              ),
+            ),
+            elevation: isSelected ? 2 : 0,
+            onSelected: (bool selected) {
+              debugPrint("Tag selected before: $selectedTags");
+              final currentTags = [...selectedTags];
+              if (selected) {
+                currentTags.add(tag);
+              } else {
+                currentTags.remove(tag);
+              }
+              ref.read(selectedTagsProvider.notifier).state = currentTags;
+              debugPrint("Tag selected after: $currentTags");
+            },
+          );
+        }).toList();
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const double breakpointWidth = 600.0;
+
+        if (constraints.maxWidth < breakpointWidth) {
+          final ScrollController scrollController = ScrollController();
+
+          return Container(
+            height: 150,
+            padding: const EdgeInsets.all(8.0),
+            decoration: BoxDecoration(
+              color: Colors.green.shade50.withAlpha(77),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.green.shade200),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Select tags",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Colors.green,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Expanded(
+                  child: Scrollbar(
+                    controller: scrollController,
+                    thumbVisibility: true,
+                    child: SingleChildScrollView(
+                      controller: scrollController,
+                      scrollDirection: Axis.vertical,
+                      child: Wrap(
+                        spacing: 8.0,
+                        runSpacing: 6.0,
+                        children: filterChips,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        } else {
+          final ScrollController scrollController = ScrollController();
+
+          return Container(
+            height:
+                MediaQuery.of(context).size.height *
+                0.2,
+            padding: const EdgeInsets.all(8.0),
+            decoration: BoxDecoration(
+              color: Colors.green.shade50.withAlpha(77),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.green.shade200),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Select tags",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: MediaQuery.of(context).size.height * 0.03,
+                    color: Colors.green,
+                  ),
+                ),
+                SizedBox(height: MediaQuery.of(context).size.height * 0.03),
+                Expanded(
+                  child: Scrollbar(
+                    controller: scrollController,
+                    thumbVisibility: true,
+                    child: SingleChildScrollView(
+                      controller: scrollController,
+                      scrollDirection: Axis.vertical,
+                      child: Wrap(
+                        spacing: 10.0,
+                        runSpacing: 6.0,
+                        children: filterChips,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+      },
     );
-  } // end build() method.
-} // end MyTagFilterChips.
+  } // end build method.
+} // end _MyTagFilterChips widget.
 
 // A widget that displays the number of filtered (visible) plants.
 class _VisiblePlantsCounter extends ConsumerWidget {
@@ -87,32 +193,38 @@ class _VisiblePlantsCounter extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     debugPrint("Building _VisiblePlantsCounter…");
 
-    // filteredPlants could be in different states: loading, error, or data.
     final filteredPlants = ref.watch(filteredPlantsProvider);
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
 
-    // We use the when() method to handle the different states of the provider.
     return filteredPlants.when(
-      // Data uploaded successfully.
       data:
           (plants) => Text(
             "${plants.length} plants found",
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: MediaQuery.of(context).size.height * 0.035,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-      // Loading: show a loading message.
       loading:
-          () => const Text(
+          () => Text(
             "Loading…",
-            style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
+            style: TextStyle(
+              fontSize: isLandscape ? 14 : 16,
+              fontStyle: FontStyle.italic,
+            ),
           ),
-      // Error: show an error message.
       error:
-          (err, _) => const Text(
+          (err, _) => Text(
             "Error: no plants found!",
-            style: TextStyle(fontSize: 16, color: Colors.red),
+            style: TextStyle(
+              fontSize: isLandscape ? 14 : 16,
+              color: Colors.red,
+            ),
           ),
     );
-  } // end build() method.
-} // end VisiblePlantsCounter.
+  } // end build method.
+} // end _VisiblePlantsCounter class.
 
 // A widget that displays a grid of plant previews. Tapping an item navigates
 // to a detailed view of the selected plant.
@@ -134,8 +246,8 @@ class _PlantGridView extends ConsumerWidget {
             itemCount: filteredPlants.length,
             // We use the grid delegate to define the layout of the grid.
             // In this case, we have three elements per row.
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 450.0,
               crossAxisSpacing: 15.0,
               mainAxisSpacing: 5.0,
               childAspectRatio: 0.9,
@@ -171,8 +283,8 @@ class _PlantGridView extends ConsumerWidget {
                       const PlantPreviewViewer(),
                       Positioned(
                         bottom: 8.0,
-                        right: 8.0,
-                        child: TextButton.icon(
+                        right: 12.0,
+                        child: RawMaterialButton(
                           onPressed: () async {
                             final result = await Navigator.push(
                               context,
@@ -196,7 +308,14 @@ class _PlantGridView extends ConsumerWidget {
                               );
                             }
                           },
-                          label: const Icon(Icons.add),
+                          elevation: 2.0,
+                          fillColor: Colors.lightGreen,
+                          shape: const CircleBorder(),
+                          constraints: const BoxConstraints.tightFor(
+                            width: 35,
+                            height: 35,
+                          ),
+                          child: const Icon(Icons.add, color: Colors.white),
                         ),
                       ),
                     ],

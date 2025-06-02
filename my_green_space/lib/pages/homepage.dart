@@ -9,11 +9,35 @@ import 'package:my_green_space/pages/specific_plant_page.dart';
 import 'package:my_green_space/utilities/providers.dart';
 import 'package:my_green_space/widgets/my_drawer.dart';
 
-class Homepage extends ConsumerWidget {
+class Homepage extends ConsumerStatefulWidget {
   const Homepage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<Homepage> createState() => _HomepageState();
+}
+
+class _HomepageState extends ConsumerState<Homepage> {
+  late final ScrollController _catalogScrollController;
+  late final ScrollController _gardenScrollController;
+
+  List<Plant>? _cachedCatalogPreviewPlants;
+
+  @override
+  void initState() {
+    super.initState();
+    _catalogScrollController = ScrollController();
+    _gardenScrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _catalogScrollController.dispose();
+    _gardenScrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final plantCatalog = ref.watch(plantCatalogProvider);
     final gardenPlants = ref.watch(gardenPlantsProvider);
 
@@ -24,7 +48,7 @@ class Homepage extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header con immagine di sfondo
+            // Header with a background image and some text over it.
             Stack(
               children: [
                 SizedBox(
@@ -68,10 +92,9 @@ class Homepage extends ConsumerWidget {
                 ),
               ],
             ),
-
             const SizedBox(height: 16),
 
-            // ==== ANTEPRIMA CATALOGO ====
+            // Some plants from the catalog are shown as a preview.
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Row(
@@ -91,48 +114,53 @@ class Homepage extends ConsumerWidget {
               height: 180,
               child: plantCatalog.when(
                 data: (plants) {
-                  final random = Random();
-                  final previewPlants =
-                      (plants.toList()..shuffle(random)).take(5).toList();
+                  // The cache is populated with some random plants.
+                  if (_cachedCatalogPreviewPlants == null) {
+                    final random = Random();
+                    _cachedCatalogPreviewPlants =
+                        (plants.toList()..shuffle(random)).take(5).toList();
+                  }
+                  final displayPlants = _cachedCatalogPreviewPlants ?? [];
 
                   return Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Expanded(
-                        child: _buildPlantPreviewList(previewPlants, context),
+                        child: _buildPlantPreviewList(displayPlants, context),
                       ),
                       const SizedBox(width: 8),
-                      Expanded(
-                        child: TextButton.icon(
-                          onPressed: () {
-                            Navigator.pushAndRemoveUntil(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const PlantCatalogPage(),
-                              ),
-                              (route) => false,
-                            );
-                          },
-                          icon: const Icon(Icons.arrow_forward),
-                          label: const Text(
-                            "View all plants from the catalog",
-                            textAlign: TextAlign.start,
-                          ),
+                      TextButton.icon(
+                        onPressed: () {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const PlantCatalogPage(),
+                            ),
+                            (route) => false,
+                          );
+                        },
+                        icon: const Icon(Icons.arrow_forward),
+                        label: const Text(
+                          "Go to the catalog",
+                          textAlign: TextAlign.start,
                         ),
                       ),
                     ],
                   );
                 },
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error:
-                    (e, _) => const Center(child: Text("Error loading plants")),
+                error: (e, _) {
+                  _cachedCatalogPreviewPlants = [];
+                  const Center(child: Text("Error loading plants"));
+                  return const Center(child: Text("Error loading plants"));
+                },
               ),
             ),
 
             const SizedBox(height: 24),
 
-            // ==== ANTEPRIMA PIANTE DELL'UTENTE ====
+            // Some plants from the user's catalog are shown as a preview.
             if (gardenPlants.isNotEmpty) ...[
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -155,20 +183,24 @@ class Homepage extends ConsumerWidget {
                 color: Colors.green.shade50,
                 height: 180,
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Expanded(
                       child: ListView.builder(
+                        controller: _gardenScrollController,
+                        key: const PageStorageKey('gardenPreviewList'),
                         scrollDirection: Axis.horizontal,
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         itemCount: gardenPlants.length.clamp(0, 5),
+                        shrinkWrap: true,
+                        physics: const ClampingScrollPhysics(),
                         itemBuilder: (context, index) {
                           final plant = gardenPlants[index];
 
                           return GestureDetector(
                             onTap: () {
-                              Navigator.pushAndRemoveUntil(
+                              Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder:
@@ -176,7 +208,6 @@ class Homepage extends ConsumerWidget {
                                         plantId: plant.id,
                                       ),
                                 ),
-                                (route) => false,
                               );
                             },
                             child: Card(
@@ -235,19 +266,18 @@ class Homepage extends ConsumerWidget {
                         },
                       ),
                     ),
-                    Expanded(
-                      child: TextButton.icon(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const HomeGardenPage(),
-                            ),
-                          );
-                        },
-                        icon: const Icon(Icons.arrow_forward),
-                        label: const Text("View all your plants"),
-                      ),
+                    TextButton.icon(
+                      onPressed: () {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const HomeGardenPage(),
+                          ),
+                          (route) => false,
+                        );
+                      },
+                      icon: const Icon(Icons.arrow_forward),
+                      label: const Text("Go to your garden"),
                     ),
                   ],
                 ),
@@ -258,8 +288,7 @@ class Homepage extends ConsumerWidget {
           ],
         ),
       ),
-
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.pushAndRemoveUntil(
             context,
@@ -267,86 +296,92 @@ class Homepage extends ConsumerWidget {
             (route) => false,
           );
         },
-        icon: const Icon(Icons.add),
-        label: const Text("New Plant"),
-        backgroundColor: Colors.green,
-        foregroundColor: Colors.white,
-        tooltip: "Add a new plant to your garden",
+        tooltip: "Add a new plant",
+        backgroundColor: Colors.green, 
+        foregroundColor: Colors.white, 
+        child: const Icon(Icons.library_add),
       ),
     );
-  }
+  } // end build method.
 
+  // Preview of the plants in the catalog.
   Widget _buildPlantPreviewList(
     List<Plant> previewPlants,
     BuildContext context,
   ) {
-    return ListView.builder(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      itemCount: previewPlants.length,
-      itemBuilder: (context, index) {
-        final plant = previewPlants[index];
+    return SizedBox(
+      height: 180,
+      width: MediaQuery.of(context).size.width,
+      child: ListView.builder(
+        controller: _catalogScrollController,
+        key: const PageStorageKey('catalogPreviewList'),
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        itemCount: previewPlants.length,
+        itemBuilder: (context, index) {
+          final plant = previewPlants[index];
 
-        return GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder:
-                    (_) => ProviderScope(
-                      overrides: [
-                        selectedPlantProvider.overrideWithValue(plant),
-                      ],
-                      child: const SpecificPlantPage(),
-                    ),
+          return GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (_) => ProviderScope(
+                        overrides: [
+                          selectedPlantProvider.overrideWithValue(plant),
+                        ],
+                        child: const SpecificPlantPage(),
+                      ),
+                ),
+              );
+            },
+            child: Card(
+              margin: const EdgeInsets.all(8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
-            );
-          },
-          child: Card(
-            margin: const EdgeInsets.all(8),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Container(
-              width: 120,
-              padding: const EdgeInsets.all(8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child:
-                          plant.imageAsset != null
-                              ? Image.asset(
-                                plant.imageAsset!,
-                                fit: BoxFit.cover,
-                                width: double.infinity,
-                              )
-                              : Container(
-                                color: Colors.green.shade100,
-                                child: const Center(
-                                  child: Icon(Icons.local_florist),
+              child: Container(
+                width: 120,
+                padding: const EdgeInsets.all(8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child:
+                            plant.imageAsset != null
+                                ? Image.asset(
+                                  plant.imageAsset!,
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                )
+                                : Container(
+                                  color: Colors.green.shade100,
+                                  child: const Center(
+                                    child: Icon(Icons.local_florist),
+                                  ),
                                 ),
-                              ),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    plant.name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
+                    const SizedBox(height: 8),
+                    Text(
+                      plant.name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
-  }
-}
+  } // end _buildPlantPreviewList widget.
+} // end Homepage.
