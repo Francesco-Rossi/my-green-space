@@ -4,6 +4,7 @@ import 'package:my_green_space/models/garden_plant.dart';
 import 'package:my_green_space/models/plant.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_green_space/utilities/garden_plants_notifier.dart';
+import 'package:my_green_space/utilities/todo_notifier.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 // Provides the full list of available plants in the catalog asynchronously.
@@ -139,3 +140,8 @@ final selectedGardenPlantProvider = Provider.family<GardenPlant?, String>((ref, 
     (plant) => plant.id == plantId,
   );
 });
+
+// Provider to expose the todo list notifier.
+final todoListProvider = StateNotifierProvider<TodoListNotifier, List<String>>(
+  (ref) => TodoListNotifier(),
+);

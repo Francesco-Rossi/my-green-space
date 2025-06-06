@@ -5,6 +5,7 @@ import 'package:my_green_space/utilities/providers.dart';
 import 'package:my_green_space/widgets/garden_plant_preview_viewer.dart';
 import 'package:my_green_space/widgets/my_drawer.dart';
 
+// Page that shows a preview of all the plants in the user's garden.
 class HomeGardenPage extends ConsumerWidget {
   const HomeGardenPage({super.key});
 
@@ -266,62 +267,8 @@ class _GardenPlantGridView extends ConsumerWidget {
               );
             }
           },
-          child: Stack(
-            children: [
-              GardenPlantPreviewViewer(plantId: gardenPlant.id),
-              Positioned(
-                right: 5,
-                top: 5,
-                child: TextButton.icon(
-                  onPressed: () async {
-                    final bool? confirm = await showDialog<bool>(
-                      context: context,
-                      builder:
-                          (ctx) => AlertDialog(
-                            title: const Text(
-                              'Delete Plant',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            content: const Text(
-                              'Are you sure you want to delete this plant?',
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.of(ctx).pop(false),
-                                child: const Text('Cancel'),
-                              ),
-                              ElevatedButton(
-                                onPressed: () => Navigator.of(ctx).pop(true),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.red,
-                                ),
-                                child: const Text(
-                                  'Delete',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ),
-                            ],
-                          ),
-                    );
 
-                    if (confirm == true) {
-                      await ref
-                          .read(gardenPlantsProvider.notifier)
-                          .removePlant(gardenPlant);
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Plant deleted successfully'),
-                          ),
-                        );
-                      }
-                    }
-                  },
-                  label: const Icon(Icons.delete, color: Colors.redAccent),
-                ),
-              ),
-            ],
-          ),
+          child: GardenPlantPreviewViewer(plantId: gardenPlant.id),
         );
       },
     );

@@ -39,23 +39,26 @@ class GardenPlantsNotifier extends StateNotifier<List<GardenPlant>> {
 
   // Method to remove a plant from the database and update the state accordingly.
   Future<void> removePlant(GardenPlant plantToRemove) async {
-    await supabase.from('garden_plants').delete().eq('id', plantToRemove.id);
+  await supabase.from('garden_plants').delete().eq('id', plantToRemove.id);
 
-    // The following code deletes all images associated with the plant
-    // from the Supabase storage.
-    final storage = supabase.storage;
-    const bucketId = 'user-plants-images';
-    final folderPath = 'plants/plant_${plantToRemove.id}';
+  final storage = supabase.storage;
+  const bucketId = 'user-plants-images';
+  final folderPath = 'plants/plant_${plantToRemove.id}';
 
-    final fileList = await storage.from(bucketId).list(path: folderPath);
-    final pathsToDelete = fileList.map((f) => '$folderPath/${f.name}').toList();
+  try {
+    // Obtain all files recursively
+    final filePaths = await _getAllFilesRecursively(bucketId, folderPath);
 
-    if (pathsToDelete.isNotEmpty) {
-      await storage.from(bucketId).remove(pathsToDelete);
+    if (filePaths.isNotEmpty) {
+      await storage.from(bucketId).remove(filePaths);
+      debugPrint("Deleted ${filePaths.length} files associated to ${plantToRemove.id}");
     }
+  } catch (e) {
+    debugPrint("Error during elimination of files for ${plantToRemove.id}: $e");
+  }
 
-    state = state.where((plant) => plant.id != plantToRemove.id).toList();
-  } // end removePlant method.
+  state = state.where((plant) => plant.id != plantToRemove.id).toList();
+} // end removePlant method.
 
   // Method to update an existing plant in the database and update the state accordingly.
   Future<void> updatePlant(GardenPlant updatedPlant) async {
@@ -83,31 +86,50 @@ class GardenPlantsNotifier extends StateNotifier<List<GardenPlant>> {
     const rootPath = 'plants';
 
     try {
-      // Get the list of all files in the root path of the bucket.
-      final files = await storage.from(bucketId).list(path: rootPath);
+      // Obtain recursively file inside 'plants/'
+      final allFilePaths = await _getAllFilesRecursively(bucketId, rootPath);
 
-      // Filter out the file paths to delete.
-      final List<String> allFilePaths = [];
-
-      for (final item in files) {
-        allFilePaths.add('$rootPath/${item.name}');
-        debugPrint("File to delete: $rootPath/${item.name}");
-      }
-      // If there are any files to delete, remove them from the storage.
+      // Delete files found
       if (allFilePaths.isNotEmpty) {
         await storage.from(bucketId).remove(allFilePaths);
+        debugPrint(
+          "Deleted ${allFilePaths.length} files from Supabase Storage.",
+        );
       }
 
-      // Remove all plants from the Supabase database.
+      // Deleting records from the database.
       await supabase
           .from('garden_plants')
           .delete()
           .neq('id', '00000000-0000-0000-0000-000000000000');
 
-      // Clear the local state.
+      // Clear the local state
       state = [];
     } catch (e, _) {
-      debugPrint("Error during clearAll: $e");
+      debugPrint("Error in clearAll: $e");
     }
-  } // end clearAll method.
+  }
+
+  Future<List<String>> _getAllFilesRecursively(
+    String bucketId,
+    String path,
+  ) async {
+    final storage = supabase.storage;
+    final items = await storage.from(bucketId).list(path: path);
+    List<String> files = [];
+
+    for (final item in items) {
+      final fullPath = '$path/${item.name}';
+
+      if (item.metadata == null || item.metadata!['mimetype'] == null) {
+        final nestedFiles = await _getAllFilesRecursively(bucketId, fullPath);
+        files.addAll(nestedFiles);
+      } else {
+        files.add(fullPath);
+        debugPrint('File to delete: $fullPath');
+      }
+    }
+
+    return files;
+  }
 } // end GardenPlantsNotifier class.

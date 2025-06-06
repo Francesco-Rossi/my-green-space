@@ -9,6 +9,9 @@ import 'package:my_green_space/pages/specific_plant_page.dart';
 import 'package:my_green_space/utilities/providers.dart';
 import 'package:my_green_space/widgets/my_drawer.dart';
 
+// Homepage that shows a list of things to do, a preview of 
+// some plants in the catalog, and a preview of some plants
+// of the user.
 class Homepage extends ConsumerStatefulWidget {
   const Homepage({super.key});
 
@@ -21,7 +24,6 @@ class _HomepageState extends ConsumerState<Homepage> {
   late final ScrollController _gardenScrollController;
 
   List<Plant>? _cachedCatalogPreviewPlants;
-
   @override
   void initState() {
     super.initState();
@@ -40,6 +42,9 @@ class _HomepageState extends ConsumerState<Homepage> {
   Widget build(BuildContext context) {
     final plantCatalog = ref.watch(plantCatalogProvider);
     final gardenPlants = ref.watch(gardenPlantsProvider);
+    // Providers to handle the local state, that is a list of things to do.
+    final todos = ref.watch(todoListProvider);
+    final todoNotifier = ref.read(todoListProvider.notifier);
 
     return Scaffold(
       appBar: AppBar(title: const Text('My green space')),
@@ -93,6 +98,137 @@ class _HomepageState extends ConsumerState<Homepage> {
               ],
             ),
             const SizedBox(height: 16),
+            // Section of things to do.
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  const Icon(Icons.list_alt, size: 28, color: Colors.black),
+                  const SizedBox(width: 8),
+                  const Text(
+                    "Your things to do",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const Spacer(),
+                  InkWell(
+                    borderRadius: BorderRadius.circular(24),
+                    onTap: () {
+                      final todoController = TextEditingController();
+                      final navigator = Navigator.of(context);
+                      final scaffoldMessenger = ScaffoldMessenger.of(context);
+                      showDialog(
+                        context: context,
+                        builder:
+                            (dialogContext) => AlertDialog(
+                              title: const Text(
+                                "Add a new thing to do",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              content: TextField(
+                                controller: todoController,
+                                autofocus: true,
+                                decoration: const InputDecoration(
+                                  hintText: "Enter a thing to do",
+                                ),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () async {
+                                    final newTodo = todoController.text.trim();
+
+                                    if (newTodo.isEmpty ||
+                                        todos.contains(newTodo)) {
+                                      scaffoldMessenger.showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            "The thing to do cannot be empty or duplicated!",
+                                          ),
+                                        ),
+                                      );
+                                      return;
+                                    }
+
+                                    await todoNotifier.addTodo(newTodo);
+
+                                    if (!mounted) return;
+
+                                    todoController.clear();
+                                    navigator.pop();
+                                  },
+                                  child: const Text("Add"),
+                                ),
+                              ],
+                            ),
+                      );
+                    },
+                    child: const CircleAvatar(
+                      backgroundColor: Colors.green,
+                      radius: 20,
+                      child: Icon(Icons.add, color: Colors.white, size: 20),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Scrollable list of todos.
+            Container(
+              padding: const EdgeInsets.all(8.0),
+              color: Colors.green.shade50,
+              height: 180,
+              child:
+                  todos.isEmpty
+                      ? const Center(
+                        child: Text(
+                          "No things to do yet. Add one!",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      )
+                      : ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        scrollDirection: Axis.vertical,
+                        itemCount: todos.length,
+                        itemBuilder: (context, index) {
+                          final scaffoldMessenger = ScaffoldMessenger.of(
+                            context,
+                          );
+                          final todo = todos[index];
+                          return Dismissible(
+                            key: Key(todo),
+                            background: Container(
+                              alignment: Alignment.centerRight,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                              ),
+                              color: Colors.red,
+                              child: const Icon(
+                                Icons.delete,
+                                color: Colors.white,
+                              ),
+                            ),
+                            onDismissed: (_) async {
+                              await todoNotifier.removeTodo(todo);
+                              if (!mounted) return;
+                              scaffoldMessenger.showSnackBar(
+                                SnackBar(
+                                  content: Text("Removed: $todo"),
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              );
+                            },
+                            child: Card(
+                              margin: const EdgeInsets.symmetric(vertical: 4),
+                              child: ListTile(title: Text(todo)),
+                            ),
+                          );
+                        },
+                      ),
+            ),
+
+            const SizedBox(height: 24),
 
             // Some plants from the catalog are shown as a preview.
             const Padding(
@@ -160,25 +296,21 @@ class _HomepageState extends ConsumerState<Homepage> {
 
             const SizedBox(height: 24),
 
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                children: [
+                  Icon(Icons.local_florist, size: 28, color: Colors.green),
+                  SizedBox(width: 8),
+                  Text(
+                    "Some of your plants",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ),
             // Some plants from the user's catalog are shown as a preview.
             if (gardenPlants.isNotEmpty) ...[
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Row(
-                  children: [
-                    Icon(Icons.local_florist, size: 28, color: Colors.green),
-                    SizedBox(width: 8),
-                    Text(
-                      "Some of your plants",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
               Container(
                 color: Colors.green.shade50,
                 height: 180,
@@ -282,6 +414,17 @@ class _HomepageState extends ConsumerState<Homepage> {
                   ],
                 ),
               ),
+            ] else ...[
+              Container(
+                color: Colors.green.shade50,
+                padding: const EdgeInsets.all(16),
+                child: const Center(
+                  child: Text(
+                    "No plants yet",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
             ],
 
             const SizedBox(height: 24),
@@ -297,8 +440,8 @@ class _HomepageState extends ConsumerState<Homepage> {
           );
         },
         tooltip: "Add a new plant",
-        backgroundColor: Colors.green, 
-        foregroundColor: Colors.white, 
+        backgroundColor: Colors.green,
+        foregroundColor: Colors.white,
         child: const Icon(Icons.library_add),
       ),
     );
