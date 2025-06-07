@@ -12,7 +12,7 @@
 
 Users can create instances from this catalog to represent their own personal plants. Each personal plant is assigned a unique ID, and users can store specific information for each one — such as its location, a list of irrigation records, personal notes, and photos documenting the plant's growth over time. Additionally, users can maintain a to-do list related to garden care and maintenance.  
 
-## Technical Details  
+## Some Technical Details  
 
 The app uses the **Riverpod** library for state management. User data is stored in **Supabase**, an online relational database. Supabase's storage feature is also used to save user-uploaded plant photos. For managing the local state — specifically the to-do list — the **shared_preferences** package is utilized.  
 
@@ -72,7 +72,7 @@ As mentioned earlier, the photos are stored in Supabase storage. Each plant has 
 
 ![storage](assets/storage.PNG)
 
-## Responsive design
+## Responsive Design
 The design is responsive and supports both horizontal and vertical orientations. For example, when a details page is opened in horizontal mode, the main photo is no longer displayed at the top with the information below; instead, it appears on the left with the information displayed on the right.
 
 ![storage](assets/responsive.jpeg)
@@ -80,6 +80,18 @@ The design is responsive and supports both horizontal and vertical orientations.
 As another example, when the catalog page is viewed in horizontal mode, multiple items are displayed per row to take advantage of the increased screen width. Thanks to its responsive horizontal design, the application can also run on the web.
 
 ![web](assets/web.PNG)
+
+## Local State
+In the application, some local state is maintained using the `shared_preferences` package. Specifically, this state consists of a list of strings representing the user's to-do items. This state is managed by a `StateNotifier`, which provides a small set of functions to modify it, such as adding and removing elements.
+
+## Packages Used
+
+The main packages used in this application are:
+
+- **file_picker**: Allows the user to select files from the device storage, such as images for plant photos.
+- **supabase_flutter**: Provides integration with the Supabase backend, including database operations and storage management.
+- **shared_preferences**: Used to store and retrieve simple local data, such as the list of to-do items.
+
 
 
 
