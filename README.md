@@ -20,9 +20,7 @@ The app uses the **Riverpod** library for state management. User data is stored 
  
 The homepage displays a preview of some random plants from the catalog as well as a selection of plants from the user’s personal garden. By tapping on a specific plant card, the user can navigate to the detailed page of that plant—either from the garden or the catalog. Additionally, the homepage shows the user's to-do list, which is stored locally using the `shared_preferences` package.
 
-<p align="center">
-  <img src="assets/foto.png" alt="Foto della pianta" width="300" />
-</p>
+![Homepage](assets/homepage.jpeg)
 
 The drawer allows the user to navigate to the plant catalog page or to the personal plants page. Before navigating to a specific page through the drawer, the navigation stack is cleared, preventing the user from going back to the previous page.
 
