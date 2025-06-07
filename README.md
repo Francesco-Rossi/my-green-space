@@ -105,8 +105,8 @@ To run this Flutter application locally, follow these steps:
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/your-username/your-repo-name.git
-   cd your-repo-name
+   git clone https://github.com/Francesco-Rossi/my-green-space.git
+   cd my-green-space
 2. **Install dependencies**
    ```bash
    flutter pub get
