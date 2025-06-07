@@ -108,6 +108,14 @@ To run this Flutter application locally, follow these steps:
    git clone https://github.com/your-username/your-repo-name.git
    cd your-repo-name
 2. **Install dependencies**
+   ```bash
+   flutter pub get
+3. **Run the application on debug mode**
+   ```bash
+   flutter run -d device # for example, chrome
+   
+   
+   
 
 
 
