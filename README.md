@@ -99,6 +99,15 @@ The main packages used in this application are:
 - **supabase_flutter**: Provides integration with the Supabase backend, including database operations and storage management.
 - **shared_preferences**: Used to store and retrieve simple local data, such as the list of to-do items.
 
+## Getting Started
+
+To run this Flutter application locally, follow these steps:
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/your-username/your-repo-name.git
+   cd your-repo-name
+2. **Install dependencies**
 
 
 
