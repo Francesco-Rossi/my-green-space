@@ -70,7 +70,7 @@ By tapping on a specific card, a detailed page opens. Here, the user can edit th
 
 As mentioned earlier, the photos are stored in Supabase storage. Each plant has its own directory, which contains two subdirectories: one for the main photo and another for the evolution photos—these are photos taken by the user that document the plant's growth. When a user deletes a photo, it is also removed from the storage.
 
-![Storage](assets/storage.jpeg)
+![storage](assets/storage.png)
 
 
  
