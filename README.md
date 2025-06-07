@@ -27,9 +27,13 @@ The drawer allows the user to navigate to the plant catalog page or to the perso
 ![Drawer](assets/drawer.jpeg)
 
 ## Plant Catalog Page
+This page displays the full list of plants available in the app’s catalog. 
 
+By tapping on a card, the user is taken to a detailed page with more information about the selected plant.
 
-## Plant catalog page
+Each plant in the catalog is associated with a set of tags. The user can filter the plant list by selecting a subset of tags: only the plants that contain **all** the selected tags will be shown. 
+
+In this application, the state is entirely handled by riverpod. For example
 
 
 
