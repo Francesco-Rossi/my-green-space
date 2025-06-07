@@ -86,7 +86,7 @@ As another example, when the catalog page is viewed in horizontal mode, multiple
 ## Actions performed by the user
 As mentioned earlier, the user can perform various actions that modify both the state provided by the providers and the data stored in the database. For example, they can update a plant’s information—such as its position—add or remove notes, upload or delete photos, and change the main image. Whenever the user performs an action, a visual feedback is provided via a `SnackBar`.
 
-
+![feedback](assets/feedback.jpeg)
 
 ## Local State
 In the application, some local state is maintained using the `shared_preferences` package. Specifically, this state consists of a list of strings representing the user's to-do items. This state is managed by a `StateNotifier`, which provides a small set of functions to modify it, such as adding and removing elements.
