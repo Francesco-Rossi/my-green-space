@@ -60,9 +60,12 @@ The information about the plants owned by the user is stored in an online relati
 
 All these methods update both the database and the state exposed by the provider.
 
+The user can also filter their plants by selecting a subset of plant types, which corresponds to the names of the plants available in the catalog. The plant preview displays the number of notes, the number of times it has been watered, and the number of photos associated with it.
 
+![Garden plant page](assets/garden_plant_page.jpeg)
 
-
+By tapping on a specific card, a detailed page opens. Here, the user can edit the plant’s information, for example by adding new photos or notes.
+![Garden plant page](assets/specific_garden_plant.jpeg)
 
 
  
