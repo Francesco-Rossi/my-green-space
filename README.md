@@ -26,14 +26,30 @@ The drawer allows the user to navigate to the plant catalog page or to the perso
 
 ![Drawer](assets/drawer.jpeg)
 
-## Plant Catalog Page
-This page displays the full list of plants available in the app’s catalog. 
+## Management of Catalog Plants
+The catalog page displays the full list of plants available in the app, from which the user can create instances representing the plants in their personal garden.
+
+![Catalog](assets/catalog.jpeg)
 
 By tapping on a card, the user is taken to a detailed page with more information about the selected plant.
 
+![Plant catalog details](assets/plant_catalog_details.jpeg)
+
 Each plant in the catalog is associated with a set of tags. The user can filter the plant list by selecting a subset of tags: only the plants that contain **all** the selected tags will be shown. 
 
-In this application, the state is entirely handled by riverpod. For example
+When the user wants to create an instance of a plant to represent one in its garden, he can set various details such as the planting date, the position, and a list of notes. He can also change the image associated with the plant.
+
+![Add a new plant](assets/add_plant.jpeg)
+
+In this application, state management is entirely handled using Riverpod. For example, the data related to the catalog plants is managed through the following providers:
+
+- **plantCatalogProvider**: provides a list of `Plant` objects. The data is loaded from a JSON file.
+- **allTagsProvider**: provides a list of strings representing all available tags.
+- **selectedTagsProvider**: a `StateProvider` that holds the list of currently selected tags.
+- **filteredPlantsProvider**: provides the list of plants that match **all** the currently selected tags.
+- **selectedPlantProvider**: provides the currently selected plant when a detail page is open.
+
+
 
 
 
