@@ -113,6 +113,8 @@ To run this Flutter application locally, follow these steps:
 3. **Run the application on debug mode**
    ```bash
    flutter run -d device # for example, chrome
+
+
    
    
    
