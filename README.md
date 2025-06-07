@@ -114,6 +114,8 @@ To run this Flutter application locally, follow these steps:
    ```bash
    flutter run -d device # for example, chrome
 
+The application can be run on both Android and the web.
+
 
 
 
