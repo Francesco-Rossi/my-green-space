@@ -75,5 +75,6 @@ As mentioned earlier, the photos are stored in Supabase storage. Each plant has 
 ## Responsive design
 The design is responsive and supports both horizontal and vertical orientations. For example, when a details page is opened in horizontal mode, the main photo is no longer displayed at the top with the information below; instead, it appears on the left with the information displayed on the right.
 
+![storage](assets/responsive.jpeg)
  
  
