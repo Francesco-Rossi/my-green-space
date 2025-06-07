@@ -25,7 +25,7 @@ The homepage displays a preview of some random plants from the catalog as well a
 The drawer allows the user to navigate to the plant catalog page or to the personal plants page. Before navigating to a specific page through the drawer, the navigation stack is cleared, preventing the user from going back to the previous page.
 
 ![Drawer](assets/drawer.jpeg)
-a
+
 
 ## Plant catalog page
 
