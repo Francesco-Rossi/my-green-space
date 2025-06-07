@@ -79,7 +79,7 @@ The design is responsive and supports both horizontal and vertical orientations.
 
 As another example, when the catalog page is viewed in horizontal mode, multiple items are displayed per row to take advantage of the increased screen width. Thanks to its responsive horizontal design, the application can also run on the web.
 
-![web](assets/web.JPG)
+![web](assets/web.PNG)
 
 
 
