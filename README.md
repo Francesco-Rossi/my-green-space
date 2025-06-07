@@ -49,6 +49,18 @@ In this application, state management is entirely handled using Riverpod. For ex
 - **filteredPlantsProvider**: provides the list of plants that match **all** the currently selected tags.
 - **selectedPlantProvider**: provides the currently selected plant when a detail page is open.
 
+## User Plant Management
+The information about the plants owned by the user is stored in an online relational database, Supabase. These plants are managed by a `StateNotifierProvider`, which includes several asynchronous methods to handle garden-related operations. When the `StateNotifier` object is instantiated, its constructor calls the `loadPlants()` method, which retrieves the user's plant data from the database. All methods in the `StateNotifier` are asynchronous, as they involve online communication. Their names are self-explanatory:
+
+- `loadPlants()`
+- `addPlant()`
+- `removePlant()`
+- `updatePlant()`
+- `clearAll()`
+
+All these methods update both the database and the state exposed by the provider.
+
+
 
 
 
