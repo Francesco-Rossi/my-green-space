@@ -65,7 +65,10 @@ The user can also filter their plants by selecting a subset of plant types, whic
 ![Garden plant page](assets/garden_plant_page.jpeg)
 
 By tapping on a specific card, a detailed page opens. Here, the user can edit the plant’s information, for example by adding new photos or notes.
+
 ![Garden plant page](assets/specific_garden_plant.jpeg)
+
+
 
 
  
