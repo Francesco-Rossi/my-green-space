@@ -14,7 +14,9 @@ Users can create instances from this catalog to represent their own personal pla
 
 ## Some Technical Details  
 
-The app uses the **Riverpod** library for state management. User data is stored in **Supabase**, an online relational database. Supabase's storage feature is also used to save user-uploaded plant photos. For managing the local state — specifically the to-do list — the **shared_preferences** package is utilized.  
+The app uses the **Riverpod** library for state management. User data is stored in **Supabase**, an online relational database. Supabase's storage feature is also used to save user-uploaded plant photos. 
+
+For managing the local state — specifically the to-do list — the **shared_preferences** package is utilized.  
 
  ## Homepage and Navigation Between Different Pages
  
